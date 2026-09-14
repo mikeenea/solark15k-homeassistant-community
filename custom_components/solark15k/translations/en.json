@@ -1,0 +1,41 @@
+{
+  "title": "Sol-Ark 15K Modbus",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add Sol-Ark 15K",
+        "description": "Configure one Waveshare Modbus TCP endpoint for one Sol-Ark 15K inverter. Setup performs a read-only test of holding register 183.",
+        "data": {
+          "name": "Name",
+          "host": "Waveshare IP address",
+          "port": "TCP port",
+          "slave_id": "Modbus slave ID"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to read Sol-Ark register 183. Check the gateway, TCP port, RS485 wiring, serial settings, and whether another monitor is contending for the bus."
+    },
+    "abort": {
+      "already_configured": "This Modbus endpoint is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Sol-Ark polling options",
+        "description": "Operational registers are polled separately from slower detail and energy registers. Each successful block is published to Home Assistant immediately. Retry quiet time is used only after a failed Modbus request.",
+        "data": {
+          "live_poll_interval": "Live telemetry interval (seconds)",
+          "fault_poll_interval": "Fault interval (seconds)",
+          "detail_poll_interval": "Electrical detail interval (seconds)",
+          "energy_poll_interval": "Energy counter interval (seconds)",
+          "minimum_request_spacing": "Minimum gap between Modbus requests (seconds)",
+          "inter_request_delay": "Retry quiet time (seconds)",
+          "request_timeout": "Request timeout (seconds)",
+          "retries": "Retries after a failed request"
+        }
+      }
+    }
+  }
+}
