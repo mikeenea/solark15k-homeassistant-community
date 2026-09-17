@@ -34,7 +34,7 @@ If a `homeassistant:` section already exists, merge the `packages:` line into it
 modbus:
   - name: solark_test
     type: tcp
-    host: 192.0.2.241
+    host: XXX.XXX.XXX.XXX
     port: 502
     timeout: 5
     delay: 1
