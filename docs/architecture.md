@@ -134,8 +134,8 @@ The two devices are distinguished by separate TCP endpoints rather than separate
 Example only:
 
 ```text
-Waveshare CH1: 192.0.2.241:502
-Waveshare CH2: 192.0.2.242:502
+Waveshare CH1: XXX.XXX.XXX.XXX:502
+Waveshare CH2: XXX.XXX.XXX.XXX:502
 Home Assistant: existing HA address
 ```
 
