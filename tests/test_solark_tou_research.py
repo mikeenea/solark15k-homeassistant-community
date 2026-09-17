@@ -50,6 +50,27 @@ class TOUResearchTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "--confirm must be exactly"):
                 MODULE.run_write(args)
 
+    def test_read_range_retries_after_transaction_failure(self):
+        class FakeClient:
+            def __init__(self):
+                self.calls = 0
+                self.closes = 0
+
+            def read_holding(self, start, count):
+                self.calls += 1
+                if self.calls == 1:
+                    raise RuntimeError("Transaction ID mismatch")
+                return list(range(count))
+
+            def close(self):
+                self.closes += 1
+
+        client = FakeClient()
+        result = MODULE.read_range(client, 10, 11, 2, 0, 1)
+        self.assertEqual(result, {10: 0, 11: 1})
+        self.assertEqual(client.calls, 2)
+        self.assertEqual(client.closes, 1)
+
 
 if __name__ == "__main__":
     unittest.main()
