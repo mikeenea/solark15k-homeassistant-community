@@ -86,7 +86,23 @@ Field comparison on a parallel Sol-Ark 15K system confirmed the following master
 
 Times use decimal HHMM encoding: `raw = hour * 100 + minute`. Period 1 was independently verified at 00:00 (`0`), 00:30 (`30`), and 01:00 (`100`), including restoration to zero. In each screen-based test, inverter 2 inherited the master's setting through the parallel communications link.
 
-An initial FC6 test of address 250 from `0` to `30` timed out and produced no change on either inverter or subsequent FC3 read-back. FC6 is therefore not considered supported for this field. The next controlled test uses FC16 with a quantity of exactly one register through the separately guarded `write-one-fc16` command.
+An initial FC6 test of address 250 from `0` to `30` timed out and produced no change on either inverter or subsequent FC3 read-back. FC6 is therefore not considered supported for this field.
+
+FC16 was then tested with a quantity of exactly one register. Writing address 250 from `0` to `30` succeeded, returned the expected FC16 response, and passed immediate FC3 read-back. The master displayed 00:30, the slave inherited 00:30, and the value persisted after closing and reopening the TOU screen. Restoration to 00:00 through the master screen returned address 250 to `0` on subsequent FC3 read-back.
+
+### TOU time write-validation status
+
+| Validation item | Result |
+|---|---|
+| Read master TOU time | Confirmed |
+| Decimal HHMM encoding | Confirmed at 00:00, 00:30, and 01:00 |
+| FC6 write | Not supported/ignored in field test |
+| FC16 quantity-one write | Confirmed |
+| Immediate FC3 read-back | Confirmed |
+| Master display update | Confirmed |
+| Slave inheritance | Confirmed |
+| Persistence after screen navigation | Confirmed |
+| Screen-based restoration and read-back | Confirmed |
 
 ## Evidence required before integration
 
