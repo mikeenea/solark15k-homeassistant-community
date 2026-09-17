@@ -4,7 +4,7 @@ All notable project changes will be documented here.
 
 The project is currently in pre-release field-validation status.
 
-## Unreleased
+## [0.2.1] - 2026-09-17
 
 ### Added
 
@@ -53,13 +53,10 @@ The project is currently in pre-release field-validation status.
 
 ## Versioning plan
 
-No stable semantic version has been assigned yet.
-
-Proposed progression:
+The repository and Home Assistant integration versions are aligned beginning with the first GitHub pre-release:
 
 ```text
-0.1.0 -> first inverter validated
-0.2.0 -> second inverter validated
+0.2.1 -> first public pre-release; single-inverter monitoring and dual-inverter-ready dashboards
 0.3.0 -> parallel aggregation validated
 0.4.0 -> InfluxDB/Grafana baseline complete
 1.0.0 -> stable read-only dual-Sol-Ark 15K release
