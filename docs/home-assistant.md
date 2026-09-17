@@ -170,9 +170,9 @@ template:
         device_class: power
         state_class: measurement
         state: >
-          {{ states('sensor.sol_ark_1_pv1_power') | float(0)
-           + states('sensor.sol_ark_1_pv2_power') | float(0)
-           + states('sensor.sol_ark_1_pv3_power') | float(0) }}
+          {{ states('sensor.sol_ark_15k_1_pv1_power') | float(0)
+           + states('sensor.sol_ark_15k_1_pv2_power') | float(0)
+           + states('sensor.sol_ark_15k_1_pv3_power') | float(0) }}
 ```
 
 ## Grid import/export split
@@ -185,7 +185,7 @@ Because register 169 uses positive=buy and negative=sell, create separate non-ne
         device_class: power
         state_class: measurement
         state: >
-          {% set p = states('sensor.sol_ark_1_grid_total_power') | float(0) %}
+          {% set p = states('sensor.sol_ark_15k_1_grid_total_power') | float(0) %}
           {{ [p, 0] | max }}
 
       - name: "Sol-Ark 1 Grid Export Power"
@@ -193,7 +193,7 @@ Because register 169 uses positive=buy and negative=sell, create separate non-ne
         device_class: power
         state_class: measurement
         state: >
-          {% set p = states('sensor.sol_ark_1_grid_total_power') | float(0) %}
+          {% set p = states('sensor.sol_ark_15k_1_grid_total_power') | float(0) %}
           {{ [-p, 0] | max }}
 ```
 
@@ -265,13 +265,13 @@ This matters for long-term statistics and Energy Dashboard compatibility.
 Recommended entity naming:
 
 ```text
-sensor.sol_ark_1_battery_voltage
-sensor.sol_ark_1_battery_soc
-sensor.sol_ark_1_pv1_power
-sensor.sol_ark_1_grid_total_power
-sensor.sol_ark_1_load_total_power
+sensor.sol_ark_15k_1_battery_voltage
+sensor.sol_ark_15k_1_battery_state_of_charge
+sensor.sol_ark_15k_1_pv1_power
+sensor.sol_ark_15k_1_grid_total_power
+sensor.sol_ark_15k_1_load_total_power
 
-sensor.sol_ark_2_battery_voltage
+sensor.sol_ark_15k_2_battery_voltage
 ...
 ```
 
