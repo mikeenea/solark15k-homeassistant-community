@@ -126,12 +126,8 @@ influxdb:
     entity_globs:
       - sensor.sol_ark_test_*
       - binary_sensor.sol_ark_test_*
-      - sensor.sol_ark_1_*
-      - binary_sensor.sol_ark_1_*
-      - sensor.sol_ark_2_*
-      - binary_sensor.sol_ark_2_*
-      - sensor.sol_ark_system_*
-      - binary_sensor.sol_ark_system_*
+      - sensor.sol_ark_15k_1_*
+      - sensor.sol_ark_15k_2_*
 ```
 
 Connection/authentication keys such as `host`, `port`, `token`, `organization`, and `bucket` should not be duplicated in YAML after the UI config entry is working.
