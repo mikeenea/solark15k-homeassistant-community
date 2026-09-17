@@ -4,7 +4,7 @@
 Uses only the Python standard library.
 
 Example:
-    py tools/solark_single_register_test.py 192.0.2.4 183
+    py tools/solark_single_register_test.py XXX.XXX.XXX.XXX 183
 
 Default register is 183 (battery voltage). Unit/slave ID is fixed at 1.
 No write functions are implemented.
