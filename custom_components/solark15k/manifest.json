@@ -3,7 +3,7 @@
   "name": "Sol-Ark 15K Modbus",
   "codeowners": ["@mikeenea"],
   "config_flow": true,
-  "documentation": "https://github.com/mikeenea/solark15k-homeassistant-community-community",
+  "documentation": "https://github.com/mikeenea/solark15k-homeassistant-community",
   "iot_class": "local_polling",
   "version": "0.2.1"
 }
