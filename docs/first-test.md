@@ -164,7 +164,7 @@ When Home Assistant entities have real numeric values, confirm that only the app
 
 Do not add unrelated Home Assistant entities just to create test data.
 
-Then confirm Grafana sees the Sol-Ark measurements in the NAS-hosted InfluxDB instance.
+Then confirm Grafana sees the Sol-Ark measurements in the selected InfluxDB instance.
 
 ## Step 8 — Stability period
 
