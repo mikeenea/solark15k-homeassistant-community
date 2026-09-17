@@ -79,7 +79,10 @@ class ModbusTCP:
             raise
 
         if rx_tid != self.transaction_id:
-            raise RuntimeError("Transaction ID mismatch")
+            self.close()
+            raise RuntimeError(
+                f"Transaction ID mismatch: sent {self.transaction_id}, received {rx_tid}"
+            )
         if protocol != 0 or unit != UNIT_ID:
             raise RuntimeError("Unexpected Modbus response header")
         if not body:
@@ -114,13 +117,39 @@ class ModbusTCP:
 
 
 def read_range(
-    client: ModbusTCP, start: int, end: int, chunk_size: int, delay: float
+    client: ModbusTCP,
+    start: int,
+    end: int,
+    chunk_size: int,
+    delay: float,
+    retries: int,
 ) -> dict[int, int]:
     result: dict[int, int] = {}
     address = start
     while address <= end:
         count = min(chunk_size, end - address + 1)
-        values = client.read_holding(address, count)
+        last_error: Exception | None = None
+        values: list[int] | None = None
+        for attempt in range(retries + 1):
+            try:
+                values = client.read_holding(address, count)
+                last_error = None
+                break
+            except Exception as exc:
+                last_error = exc
+                client.close()
+                if attempt < retries:
+                    print(
+                        f"Retry {attempt + 1}/{retries}: registers "
+                        f"{address}..{address + count - 1} failed: {exc}",
+                        file=sys.stderr,
+                    )
+                    time.sleep(delay)
+        if last_error is not None or values is None:
+            raise RuntimeError(
+                f"registers {address}..{address + count - 1} failed after "
+                f"{retries + 1} attempts: {last_error}"
+            )
         result.update({address + index: value for index, value in enumerate(values)})
         address += count
         if address <= end and delay:
@@ -171,6 +200,7 @@ def build_parser() -> argparse.ArgumentParser:
     snapshot.add_argument("--end", type=int, default=255)
     snapshot.add_argument("--chunk-size", type=int, default=8)
     snapshot.add_argument("--delay", type=float, default=1.0)
+    snapshot.add_argument("--retries", type=int, default=3)
     snapshot.add_argument("--output", type=Path, required=True)
 
     diff = commands.add_parser("diff", help="Compare two snapshots without an inverter connection")
@@ -195,11 +225,20 @@ def build_parser() -> argparse.ArgumentParser:
 def run_snapshot(args: argparse.Namespace) -> int:
     if not 0 <= args.start <= args.end <= 65535:
         raise ValueError("Snapshot range must satisfy 0 <= start <= end <= 65535")
-    if not 1 <= args.chunk_size <= 125 or args.delay < 0:
-        raise ValueError("chunk-size must be 1..125 and delay must be non-negative")
+    if not 1 <= args.chunk_size <= 125 or args.delay < 0 or args.retries < 0:
+        raise ValueError(
+            "chunk-size must be 1..125; delay and retries must be non-negative"
+        )
     client = ModbusTCP(args.host, args.port, args.timeout)
     try:
-        registers = read_range(client, args.start, args.end, args.chunk_size, args.delay)
+        registers = read_range(
+            client,
+            args.start,
+            args.end,
+            args.chunk_size,
+            args.delay,
+            args.retries,
+        )
     finally:
         client.close()
     document = snapshot_document(args.host, args.port, args.start, args.end, registers)
