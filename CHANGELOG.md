@@ -8,6 +8,7 @@ The project is currently in pre-release field-validation status.
 
 ### Added
 
+- Development-only TOU register snapshot, comparison, and guarded single-register research utility.
 - Public deployment guide with explicit one-inverter and two-parallel-inverter paths.
 - Concise standalone-inverter installation guide.
 - HACS custom-repository metadata.
