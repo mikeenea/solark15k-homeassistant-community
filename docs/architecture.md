@@ -92,6 +92,8 @@ The validation process is:
 
 Home Assistant Recorder remains the operational database. InfluxDB is used as the high-resolution historian.
 
+The historian host is intentionally platform-neutral. InfluxDB may run on a dedicated server, VM, Docker host, supported NAS, Home Assistant host, or another private system with persistent storage. The data model and dashboards do not depend on the host vendor.
+
 Recommended roles:
 
 | Layer | Role |
