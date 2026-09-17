@@ -1,14 +1,34 @@
 # Sol-Ark 15K Home Assistant Modbus
 
-A local, read-only Home Assistant integration for Sol-Ark 15K hybrid inverters using native Modbus TCP through a Waveshare dual-channel RS485-to-PoE gateway.
+A local, read-only Home Assistant integration for one Sol-Ark 15K inverter or two Sol-Ark 15K inverters operating in parallel, using native Modbus TCP through an Ethernet-to-RS485 gateway.
 
-This project provides independent, local access to inverter telemetry through documented Sol-Ark Modbus interfaces, Home Assistant, InfluxDB, and Grafana. The initial target is a pair of parallel Sol-Ark 15K inverters, with one isolated RS485 channel per inverter.
+This project provides independent, local access to inverter telemetry through documented Sol-Ark Modbus interfaces, Home Assistant, InfluxDB, and Grafana. A standalone installation uses one isolated RS485 endpoint. A parallel installation uses two isolated endpoints, one per inverter.
 
 > **Project status:** active development / field validation. Monitoring first; no Modbus writes.
 
+## Start here
+
+Use the [deployment guide](docs/deployment-guide.md) for the complete installation sequence. It separates the common steps from the two supported deployment paths:
+
+- **One inverter:** one gateway endpoint, one Home Assistant integration entry, and the inverter `1` dashboard selection.
+- **Two parallel inverters:** two electrically independent RS485 endpoints, two Home Assistant integration entries, and inverter `1`, inverter `2`, and system/parallel dashboard views.
+
+Focused references: [single-inverter deployment](docs/single-inverter.md) and [parallel dual-inverter deployment](docs/dual-inverter.md).
+
+For both configurations, the Sol-Ark Modbus slave ID remains `1`. Parallel inverters are distinguished by separate TCP endpoints, not by changing the slave ID.
+
+### Quick installation outline
+
+1. Configure the gateway for Modbus TCP to RTU, TCP 502, and 9600/8/N/1.
+2. Validate each inverter independently with `tools/solark_modbus_probe.py`.
+3. Install `custom_components/solark15k` manually or as a HACS custom repository.
+4. Add one integration entry per inverter.
+5. Configure InfluxDB export for `sensor.sol_ark_15k_1_*` and, when present, `sensor.sol_ark_15k_2_*`.
+6. Import the four supported Grafana dashboards and select the correct bucket/data source.
+
 ## What this project provides
 
-- Native Home Assistant `modbus:` configuration for Sol-Ark 15K telemetry.
+- A native Home Assistant custom integration for read-only Sol-Ark 15K telemetry.
 - Waveshare 2-CH RS485 TO POE ETH (B) setup guidance.
 - Reuse of the RS485 side of a Sol-Ark/SolarAssistant CAN/RS485 splitter where applicable.
 - A no-dependency Python Modbus TCP probe for commissioning.
@@ -21,6 +41,7 @@ This project provides independent, local access to inverter telemetry through do
 - Grafana dashboard design for multi-year historical analysis.
 - Fault-word monitoring and future fault decoding.
 - Troubleshooting and validation procedures.
+- A complete [single- and dual-inverter deployment guide](docs/deployment-guide.md).
 
 ## Included Grafana dashboards
 
@@ -151,7 +172,7 @@ Do not begin by connecting both inverters.
 4. Verify TCP reachability.
 5. Run the included Python probe.
 6. Compare live values with the Sol-Ark display.
-7. Enable the Home Assistant test package.
+7. Install and configure the Home Assistant custom integration.
 8. Validate signed values and temperature scaling.
 9. Run for a stability period.
 10. Repeat on Sol-Ark #2 / Waveshare channel 2, or move the temporary single-channel test gateway to Sol-Ark #2.
@@ -169,6 +190,8 @@ See [`docs/first-test.md`](docs/first-test.md).
 ├── THIRD_PARTY_NOTICES.md
 ├── docs/
 │   ├── architecture.md
+│   ├── deployment-guide.md
+│   ├── single-inverter.md
 │   ├── hardware.md
 │   ├── wiring.md
 │   ├── waveshare-setup.md
@@ -179,6 +202,18 @@ See [`docs/first-test.md`](docs/first-test.md).
 │   ├── nas-influxdb.md
 │   ├── grafana.md
 │   └── troubleshooting.md
+├── custom_components/
+│   └── solark15k/
+│       ├── manifest.json
+│       ├── config_flow.py
+│       ├── coordinator.py
+│       └── sensor.py
+├── grafana/
+│   └── dashboards/
+│       ├── solark15k-operational-overview.json
+│       ├── solark15k-charts.json
+│       ├── solark15k-energy-totals.json
+│       └── solark15k-system-detail.json
 ├── docker/
 │   └── influxdb-compose.yml
 ├── homeassistant/
