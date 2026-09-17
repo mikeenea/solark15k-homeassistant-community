@@ -80,18 +80,14 @@ Grafana dashboards for this project must query only the project-created Sol-Ark 
 
 During first-test commissioning, the current test package creates Home Assistant entity names based on the `Sol-Ark Test ...` names. These resolve to the `sensor.sol_ark_test_*` namespace.
 
-The production implementation will use dedicated namespaces for inverter #1, inverter #2, and system-level formulas. Because Home Assistant slugifies `Sol-Ark` to `sol_ark`, the intended production namespaces are:
+The custom integration uses dedicated namespaces for inverter #1 and inverter #2. With the recommended entry names, the production namespaces are:
 
 ```text
-sensor.sol_ark_1_*
-sensor.sol_ark_2_*
-sensor.sol_ark_system_*
-binary_sensor.sol_ark_1_*
-binary_sensor.sol_ark_2_*
-binary_sensor.sol_ark_system_*
+sensor.sol_ark_15k_1_*
+sensor.sol_ark_15k_2_*
 ```
 
-Until production naming is finalized, the include-only filter should cover only the current test namespace plus those future production namespaces:
+For the custom integration, restrict the include-only filter to the production namespaces. Retain the test namespace only while actively using the commissioning package:
 
 ```yaml
 influxdb:
@@ -99,12 +95,8 @@ influxdb:
     entity_globs:
       - sensor.sol_ark_test_*
       - binary_sensor.sol_ark_test_*
-      - sensor.sol_ark_1_*
-      - binary_sensor.sol_ark_1_*
-      - sensor.sol_ark_2_*
-      - binary_sensor.sol_ark_2_*
-      - sensor.sol_ark_system_*
-      - binary_sensor.sol_ark_system_*
+      - sensor.sol_ark_15k_1_*
+      - sensor.sol_ark_15k_2_*
 ```
 
 Do **not** add JK, SOK, iBMS, YamBMS, or general Home Assistant globs to this project database.
