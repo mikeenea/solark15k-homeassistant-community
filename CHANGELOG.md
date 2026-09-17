@@ -2,7 +2,21 @@
 
 All notable project changes will be documented here.
 
-The project is currently in pre-release field-validation status.
+Single-inverter monitoring is stable. Parallel-inverter aggregation remains in field validation.
+
+## [0.2.2] - 2026-09-17
+
+### Added
+
+- Complete single-inverter quick start covering Waveshare installation, gateway configuration, connectivity testing, HACS installation, Home Assistant configuration, optional InfluxDB/Grafana setup, and concise troubleshooting.
+- Traceable single-inverter field-validation record based on completed live-system testing.
+
+### Changed
+
+- Promoted the documented release boundary to stable single-inverter monitoring.
+- Standardized user-facing gateway examples on `XXX.XXX.XXX.XXX`.
+- Clarified that Parallel System Detail and inverter 2 data are optional for single-inverter users.
+- Kept all experimental TOU write work isolated from the stable read-only release.
 
 ## [0.2.1] - 2026-09-17
 
@@ -57,6 +71,7 @@ The repository and Home Assistant integration versions are aligned beginning wit
 
 ```text
 0.2.1 -> first public pre-release; single-inverter monitoring and dual-inverter-ready dashboards
+0.2.2 -> stable single-inverter monitoring release
 0.3.0 -> parallel aggregation validated
 0.4.0 -> InfluxDB/Grafana baseline complete
 1.0.0 -> stable read-only dual-Sol-Ark 15K release
