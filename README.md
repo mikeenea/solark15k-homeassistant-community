@@ -4,16 +4,18 @@ A local, read-only Home Assistant integration for one Sol-Ark 15K inverter or tw
 
 This project provides independent, local access to inverter telemetry through documented Sol-Ark Modbus interfaces, Home Assistant, InfluxDB, and Grafana. A standalone installation uses one isolated RS485 endpoint. A parallel installation uses two isolated endpoints, one per inverter.
 
-> **Project status:** active development / field validation. Monitoring first; no Modbus writes.
+> **Project status:** stable single-inverter monitoring; parallel-inverter aggregation remains under field validation. The public release is read-only.
 
 ## Start here
 
-Use the [deployment guide](docs/deployment-guide.md) for the complete installation sequence. It separates the common steps from the two supported deployment paths:
+For one inverter, use the concise [Single-Inverter Quick Start](docs/single-inverter.md). It includes Waveshare wiring and configuration, connection testing, HACS installation, Home Assistant setup, and optional dashboards.
+
+Use the [deployment guide](docs/deployment-guide.md) for the complete one- or two-inverter sequence:
 
 - **One inverter:** one gateway endpoint, one Home Assistant integration entry, and the inverter `1` dashboard selection.
 - **Two parallel inverters:** two electrically independent RS485 endpoints, two Home Assistant integration entries, and inverter `1`, inverter `2`, and system/parallel dashboard views.
 
-Focused references: [single-inverter deployment](docs/single-inverter.md) and [parallel dual-inverter deployment](docs/dual-inverter.md).
+Field-validation history is recorded in [single-inverter-validation.md](docs/single-inverter-validation.md). Users do not need to repeat the development tests when their installation is operating normally. Parallel-system details are in [dual-inverter.md](docs/dual-inverter.md).
 
 For both configurations, the Sol-Ark Modbus slave ID remains `1`. Parallel inverters are distinguished by separate TCP endpoints, not by changing the slave ID.
 
