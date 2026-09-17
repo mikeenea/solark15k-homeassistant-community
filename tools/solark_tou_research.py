@@ -25,6 +25,7 @@ from typing import Any
 UNIT_ID = 1
 FC_READ_HOLDING = 3
 FC_WRITE_SINGLE = 6
+FC_WRITE_MULTIPLE = 16
 WRITE_ENV_NAME = "SOLARK_UNSAFE_WRITE_ACK"
 WRITE_ENV_VALUE = "I_ACCEPT_THE_RISK"
 
@@ -114,6 +115,16 @@ class ModbusTCP:
         body = self.request(request, FC_WRITE_SINGLE)
         if body != request:
             raise RuntimeError("FC6 response did not echo the requested write")
+
+    def write_multiple_one(self, address: int, value: int) -> None:
+        """Write one holding register with FC16 and validate address/count reply."""
+        if not 0 <= address <= 65535 or not 0 <= value <= 65535:
+            raise ValueError("Address and value must be uint16")
+        pdu = struct.pack(">BHHBH", FC_WRITE_MULTIPLE, address, 1, 2, value)
+        body = self.request(pdu, FC_WRITE_MULTIPLE)
+        expected = struct.pack(">BHH", FC_WRITE_MULTIPLE, address, 1)
+        if body != expected:
+            raise RuntimeError("FC16 response did not confirm the requested address/count")
 
 
 def read_range(
@@ -219,6 +230,20 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Must equal WRITE-MASTER-<address>-FROM-<expected>-TO-<value>",
     )
+
+    write_fc16 = commands.add_parser(
+        "write-one-fc16",
+        help="EXPERIMENTAL: guarded FC16 write containing exactly one register",
+    )
+    add_connection_arguments(write_fc16)
+    write_fc16.add_argument("--address", type=int, required=True)
+    write_fc16.add_argument("--expected", type=int, required=True)
+    write_fc16.add_argument("--value", type=int, required=True)
+    write_fc16.add_argument(
+        "--confirm",
+        required=True,
+        help="Must equal WRITE-FC16-MASTER-<address>-FROM-<expected>-TO-<value>",
+    )
     return parser
 
 
@@ -294,6 +319,40 @@ def run_write(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_write_fc16(args: argparse.Namespace) -> int:
+    phrase = f"WRITE-FC16-MASTER-{args.address}-FROM-{args.expected}-TO-{args.value}"
+    if os.environ.get(WRITE_ENV_NAME) != WRITE_ENV_VALUE:
+        raise RuntimeError(
+            f"Write blocked. Set {WRITE_ENV_NAME}={WRITE_ENV_VALUE} for this process only."
+        )
+    if args.confirm != phrase:
+        raise RuntimeError(f"Write blocked. --confirm must be exactly: {phrase}")
+    if not all(0 <= value <= 65535 for value in (args.address, args.expected, args.value)):
+        raise ValueError("Address, expected value, and new value must be uint16")
+    if args.expected == args.value:
+        raise ValueError("New value is identical to expected value")
+
+    client = ModbusTCP(args.host, args.port, args.timeout)
+    try:
+        current = client.read_holding(args.address, 1)[0]
+        if current != args.expected:
+            raise RuntimeError(
+                f"Write blocked: register {args.address} is {current}, not expected {args.expected}"
+            )
+        print(f"Verified register {args.address}: {current} (0x{current:04X})")
+        client.write_multiple_one(args.address, args.value)
+        actual = client.read_holding(args.address, 1)[0]
+        if actual != args.value:
+            raise RuntimeError(
+                f"WRITE VERIFICATION FAILED: expected {args.value}, read back {actual}"
+            )
+        print(f"FC16 WRITE VERIFIED: register {args.address} = {actual} (0x{actual:04X})")
+        print("Confirm the master and slave inverter screens immediately.")
+    finally:
+        client.close()
+    return 0
+
+
 def main() -> int:
     args = build_parser().parse_args()
     try:
@@ -303,6 +362,8 @@ def main() -> int:
             return run_diff(args)
         if args.command == "write-single":
             return run_write(args)
+        if args.command == "write-one-fc16":
+            return run_write_fc16(args)
         raise RuntimeError("Unknown command")
     except (OSError, ValueError, RuntimeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
