@@ -9,11 +9,18 @@ The key rule is simple: **validate each inverter independently before creating s
 ## Physical topology
 
 ```text
-Sol-Ark #1 splitter RS485 -> Waveshare CH1 -> IP A:502 -> HA hub solark_1
-Sol-Ark #2 splitter RS485 -> Waveshare CH2 -> IP B:502 -> HA hub solark_2
+Sol-Ark #1 splitter RS485 -> Waveshare CH1 -> IP A:502 -> HA entry Sol-Ark 15K #1
+Sol-Ark #2 splitter RS485 -> Waveshare CH2 -> IP B:502 -> HA entry Sol-Ark 15K #2
 ```
 
 Each inverter remains on its own RS485 channel.
+
+Add the custom integration twice. Each entry uses its own TCP endpoint, while both retain Modbus slave ID `1`. With the recommended entry names, Home Assistant creates the production namespaces:
+
+```text
+sensor.sol_ark_15k_1_*
+sensor.sol_ark_15k_2_*
+```
 
 ## Slave addressing
 
@@ -127,8 +134,8 @@ template:
         device_class: power
         state_class: measurement
         state: >
-          {{ states('sensor.sol_ark_1_inverter_total_power') | float(0)
-           + states('sensor.sol_ark_2_inverter_total_power') | float(0) }}
+          {{ states('sensor.sol_ark_15k_1_inverter_total_power') | float(0)
+           + states('sensor.sol_ark_15k_2_inverter_total_power') | float(0) }}
 ```
 
 Example for system PV after confirming each inverter's PV registers are local:
@@ -139,8 +146,8 @@ Example for system PV after confirming each inverter's PV registers are local:
         device_class: power
         state_class: measurement
         state: >
-          {{ states('sensor.sol_ark_1_total_pv_power') | float(0)
-           + states('sensor.sol_ark_2_total_pv_power') | float(0) }}
+          {{ states('sensor.sol_ark_15k_1_pv_total_power') | float(0)
+           + states('sensor.sol_ark_15k_2_pv_total_power') | float(0) }}
 ```
 
 ## Duplicated values
@@ -171,9 +178,9 @@ If one inverter or one Waveshare channel goes offline, retain individual entitie
 Potential diagnostic entities:
 
 ```text
-binary_sensor.sol_ark_1_modbus_online
-binary_sensor.sol_ark_2_modbus_online
-binary_sensor.sol_ark_parallel_data_consistent
+binary_sensor.sol_ark_15k_1_modbus_online
+binary_sensor.sol_ark_15k_2_modbus_online
+binary_sensor.sol_ark_15k_parallel_data_consistent
 ```
 
 These can be added after the first field deployment.
@@ -192,17 +199,10 @@ system=combined
 
 This enables future analysis of load sharing, PV production differences, temperature imbalance, and inverter-specific faults.
 
-## Final production package
+## Dashboard behavior
 
-The planned production package will contain:
+The supplied Grafana dashboards expect `sol_ark_15k_1_*` and `sol_ark_15k_2_*` InfluxDB entity tags. Electrical Trends includes nine MPPT comparison charts that overlay inverter 1 and inverter 2. Parallel System Detail presents inverter 1, system, inverter 2, and delta columns. Inverter 2 series appear automatically after the second integration entry is exporting data.
 
-- two Modbus TCP hubs;
-- complete per-inverter raw sensors;
-- validated derived sensors;
-- validated system aggregation;
-- named fault sensors;
-- availability monitoring;
-- Energy Dashboard-ready counters;
-- InfluxDB include/exclude guidance.
+Energy Accounting provides a `System` selection. Validate that the energy entities represent the intended per-inverter quantities before relying on combined totals. Do not sum registers classified as duplicated system values.
 
-Do not promote the test package to production until the parallel-system validation matrix is complete.
+See [deployment-guide.md](deployment-guide.md) for the complete installation sequence.
