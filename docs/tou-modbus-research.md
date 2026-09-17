@@ -14,11 +14,11 @@ This work is isolated on the `dev/tou-modbus-research` branch. The released Home
 
 ## 1. Create the baseline snapshot
 
-Stop other Modbus polling temporarily so the research session is the only client using the selected gateway channel. From the repository root:
+Temporarily disable the inverter 1 Home Assistant integration entry, or otherwise stop all polling of the master gateway channel, so the research session is its only Modbus client. Some TCP-to-RTU gateways can associate an RTU response with the wrong concurrent TCP request. From the repository root:
 
 ```powershell
 py .\tools\solark_tou_research.py snapshot 192.0.2.241 `
-  --start 0 --end 255 --chunk-size 8 --delay 1 `
+  --start 0 --end 255 --chunk-size 8 --delay 2 --retries 3 `
   --output .\tou-before.json
 ```
 
@@ -40,7 +40,7 @@ Do not change operating mode, grid-interconnection settings, battery voltage, ba
 
 ```powershell
 py .\tools\solark_tou_research.py snapshot 192.0.2.241 `
-  --start 0 --end 255 --chunk-size 8 --delay 1 `
+  --start 0 --end 255 --chunk-size 8 --delay 2 --retries 3 `
   --output .\tou-after.json
 
 py .\tools\solark_tou_research.py diff .\tou-before.json .\tou-after.json
