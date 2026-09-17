@@ -42,7 +42,7 @@ Storage/autopolling: disabled
 Sol-Ark slave ID: 1
 ```
 
-Use DHCP reservations or static addresses appropriate for your network. Addresses in this repository such as `192.0.2.x` are documentation examples and must not be copied as production addresses.
+Use DHCP reservations or static addresses appropriate for your network. `XXX.XXX.XXX.XXX` means the actual gateway address assigned by the user.
 
 ## 3. Wire and validate the first inverter
 
@@ -53,13 +53,13 @@ Use DHCP reservations or static addresses appropriate for your network. Addresse
 5. Confirm TCP port 502:
 
    ```powershell
-   Test-NetConnection <gateway-ip> -Port 502
+   Test-NetConnection XXX.XXX.XXX.XXX -Port 502
    ```
 
 6. From the repository root, run:
 
    ```powershell
-   python tools/solark_modbus_probe.py <gateway-ip>
+   py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX
    ```
 
 7. Confirm battery voltage, SOC, PV, load, and temperature values are plausible.
@@ -109,7 +109,7 @@ Do not run the legacy YAML commissioning package and the custom integration agai
 
    ```text
    Name: Sol-Ark 15K #1
-   Host: <gateway endpoint for inverter 1>
+   Host: XXX.XXX.XXX.XXX
    Port: 502
    Slave ID: 1
    ```
@@ -138,7 +138,7 @@ Complete this section only after inverter 1 is stable.
 
    ```text
    Name: Sol-Ark 15K #2
-   Host: <gateway endpoint for inverter 2>
+   Host: XXX.XXX.XXX.XXX
    Port: 502
    Slave ID: 1
    ```
