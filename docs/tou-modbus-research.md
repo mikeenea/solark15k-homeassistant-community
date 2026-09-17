@@ -119,3 +119,41 @@ A writable field will not be added to Home Assistant until we have recorded:
 - a safe restoration procedure.
 
 TOU schedule controls should ultimately be applied as one validated configuration transaction with an explicit **Apply Schedule** action. They should not be continuously rewritten by an automation.
+
+## Research checkpoint — 2026-09-17
+
+Work is intentionally paused with normal Home Assistant monitoring re-enabled and TOU period 1 restored to 00:00.
+
+### Confirmed findings
+
+- The parallel-system master is the only endpoint that needs a configuration write.
+- The slave inherits the master's TOU time through the Sol-Ark parallel communications link.
+- PDU holding-register addresses 250–255 correspond to TOU periods 1–6.
+- TOU times use decimal HHMM encoding (`hour * 100 + minute`).
+- Address 250 was read-validated at 00:00 (`0`), 00:30 (`30`), and 01:00 (`100`).
+- FC6 timed out and made no setting or register change.
+- FC16 with starting address 250, quantity 1, and value 30 succeeded.
+- The FC16 change was confirmed by immediate FC3 read-back, the master display, the slave display, and persistence after reopening the TOU screen.
+- Restoring period 1 to 00:00 on the master returned address 250 to `0` on FC3 read-back.
+
+### Safe system state at pause
+
+- TOU period 1 is restored to 00:00.
+- Normal Home Assistant monitoring is re-enabled.
+- No experimental environment acknowledgement remains set.
+- No writable controls have been added to the Home Assistant integration.
+- All experimental code remains isolated on `dev/tou-modbus-research`.
+
+### Next session
+
+1. Switch to and update `dev/tou-modbus-research`.
+2. Temporarily disable Home Assistant polling of the master gateway.
+3. Take a fresh full baseline snapshot; do not rely on earlier local snapshots.
+4. Record all six displayed TOU power limits and SOC limits.
+5. Change only period 1 power by the smallest permitted increment and use before/after/restored snapshots to identify its register.
+6. Repeat the read-only discovery process for period 1 SOC.
+7. Map the other five fields from sequential values only after the first address and encoding are confirmed.
+8. Map grid-charge and generator-charge permissions last because they may be packed bit fields.
+9. Do not attempt another write until the candidate address, encoding, range, and screen-based restoration have been independently confirmed.
+
+Local `tou-*.json` snapshots are research evidence and may contain private endpoint metadata. They are intentionally not committed. Preserve them locally if desired, but create a fresh baseline when work resumes.
