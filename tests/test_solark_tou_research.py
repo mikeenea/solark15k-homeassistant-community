@@ -71,6 +71,27 @@ class TOUResearchTests(unittest.TestCase):
         self.assertEqual(client.calls, 2)
         self.assertEqual(client.closes, 1)
 
+    def test_fc16_confirmation_phrase_is_function_specific(self):
+        args = MODULE.build_parser().parse_args(
+            [
+                "write-one-fc16",
+                "192.0.2.241",
+                "--address",
+                "250",
+                "--expected",
+                "0",
+                "--value",
+                "30",
+                "--confirm",
+                "WRITE-MASTER-250-FROM-0-TO-30",
+            ]
+        )
+        with patch.dict(
+            os.environ, {MODULE.WRITE_ENV_NAME: MODULE.WRITE_ENV_VALUE}, clear=False
+        ):
+            with self.assertRaisesRegex(RuntimeError, "WRITE-FC16-MASTER"):
+                MODULE.run_write_fc16(args)
+
 
 if __name__ == "__main__":
     unittest.main()
