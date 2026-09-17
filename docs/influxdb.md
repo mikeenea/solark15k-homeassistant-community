@@ -8,29 +8,23 @@ This project intentionally does **not** use InfluxDB as a general Home Assistant
 
 The design goal is to preserve enough detail for Sol-Ark troubleshooting and performance analysis without storing unrelated Home Assistant data or every 10-second value forever.
 
-## Field-verified deployment status — 2026-09-06
+## Supported hosting models
 
-The production historian has been moved off the Home Assistant host and onto the UGREEN NAS.
+InfluxDB is not tied to a particular appliance. It may run on:
 
-Current staged state:
+- a dedicated Linux server or virtual machine;
+- any Docker or compatible container host;
+- a NAS that supports persistent containers;
+- the Home Assistant host when its storage and resources are suitable;
+- another private host reachable by Home Assistant and Grafana.
 
-- UGREEN Docker project `solark-influxdb` is running.
-- InfluxDB OSS 2.8.0 is pinned with `influxdb:2.8.0`.
-- The production bucket is `solark` in organization `home`.
-- Home Assistant has been reconfigured through the InfluxDB integration UI to write to the NAS-hosted instance.
-- The YAML configuration retains the Sol-Ark-only include filter; connection/authentication details are no longer intended to remain duplicated in YAML after the UI config entry is working.
-- Grafana remains available from Home Assistant and has been reconfigured to read the NAS-hosted InfluxDB instance.
-- Grafana data-source validation succeeds and sees the `solark` bucket.
-- `sensor.sol_ark_test_*` entities are present in Home Assistant.
-- Those entities currently report `unknown` because the Waveshare Modbus gateway has not yet been installed; therefore the clean `solark` bucket is expected to remain empty until live inverter telemetry exists.
+Whatever host is selected must provide persistent storage, reliable backup, time synchronization, a stable IP address or DNS name, and TCP access to port 8086 from Home Assistant and Grafana. Do not expose InfluxDB directly to the public Internet.
 
-Do not add unrelated Home Assistant entities merely to test Grafana. Resume historian validation after the Waveshare is installed and live Sol-Ark values are available.
-
-See [`nas-influxdb.md`](nas-influxdb.md) for the field-verified NAS deployment and [`../docker/influxdb-compose.yml`](../docker/influxdb-compose.yml) for the pinned Docker definition.
+The supplied [`../docker/influxdb-compose.yml`](../docker/influxdb-compose.yml) is portable across ordinary Docker hosts. [`nas-influxdb.md`](nas-influxdb.md) records one field-tested UGREEN deployment; it is an optional example, not a hardware requirement.
 
 ## Deployment policy
 
-The production historian should remain on persistent NAS storage rather than using the Home Assistant system disk as the long-term database location.
+The production historian should use durable persistent storage sized for the selected sampling interval and retention period. For large or multi-year installations, a dedicated server, VM, Docker host, or NAS is preferred. A Home Assistant-hosted instance is also valid for smaller installations when storage, backups, and resource use are acceptable.
 
 Current production image:
 
@@ -42,12 +36,10 @@ Keep the image pinned during commissioning and initial data collection. Do not r
 
 A future migration to InfluxDB 3 should be treated as a separate planned change because it can affect Grafana query language, historical-data handling, compatibility, migration procedures, and rollback requirements.
 
-The earlier Home Assistant-hosted InfluxDB app was useful for initial staging, but it is no longer the intended production historian.
-
 ## Data-flow role
 
 ```text
-Sol-Ark -> Waveshare -> Home Assistant -> UGREEN NAS InfluxDB -> Grafana
+Sol-Ark -> Waveshare -> Home Assistant -> InfluxDB 2.x -> Grafana
                                |
                                +-> Recorder / HA long-term statistics
 ```
@@ -252,7 +244,7 @@ Weekly backup: retain 8 weeks
 Monthly backup: retain 24 months or longer
 ```
 
-Store backups separately from the primary UGREEN NAS storage pool when practical. RAID is not a substitute for backup.
+Store backups separately from the primary InfluxDB host when practical. RAID is not a substitute for backup.
 
 ## Rebuild philosophy
 
