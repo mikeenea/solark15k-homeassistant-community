@@ -43,6 +43,8 @@ For both configurations, the Sol-Ark Modbus slave ID remains `1`. Parallel inver
 - Troubleshooting and validation procedures.
 - A complete [single- and dual-inverter deployment guide](docs/deployment-guide.md).
 
+Experimental writable-register research is isolated from the released read-only integration. See [`docs/tou-modbus-research.md`](docs/tou-modbus-research.md) on the `dev/tou-modbus-research` branch.
+
 ## Included Grafana dashboards
 
 The repository provides four supported, independently designed dashboards:
