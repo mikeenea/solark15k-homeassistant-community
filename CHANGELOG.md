@@ -8,6 +8,10 @@ The project is currently in pre-release field-validation status.
 
 ### Added
 
+- Public deployment guide with explicit one-inverter and two-parallel-inverter paths.
+- Concise standalone-inverter installation guide.
+- HACS custom-repository metadata.
+- Dashboard configuration guidance for standalone and parallel systems.
 - Independent four-dashboard public design system and configurable Grafana variables.
 - Dashboard design provenance and publication policy.
 - Public import documentation for Operational Console, Electrical Trends, Energy Accounting, and Parallel System Detail.
@@ -39,6 +43,12 @@ The project is currently in pre-release field-validation status.
 - Battery temperature encoding should be confirmed against current firmware.
 - Parallel-inverter register semantics require field classification before aggregation.
 - Lifetime energy 32-bit word handling should be compared to inverter totals during commissioning.
+
+### Changed
+
+- Corrected the integration documentation URL.
+- Standardized documentation on the production `sol_ark_15k_1_*` and `sol_ark_15k_2_*` namespaces.
+- Converted the installation checklist from site-specific status reporting to a reusable public checklist.
 
 ## Versioning plan
 
