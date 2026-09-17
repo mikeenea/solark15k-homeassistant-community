@@ -71,6 +71,23 @@ Remove-Item Env:\SOLARK_UNSAFE_WRITE_ACK
 
 Immediately confirm the setting on both inverter screens. Restore the original value from the master screen unless the test plan explicitly requires retaining the new value.
 
+## Confirmed TOU time registers
+
+Field comparison on a parallel Sol-Ark 15K system confirmed the following master-inverter holding-register addresses:
+
+| TOU period | PDU address | Example display | Raw value |
+|---|---:|---:|---:|
+| 1 | 250 | 00:00 | 0 |
+| 2 | 251 | 04:00 | 400 |
+| 3 | 252 | 08:00 | 800 |
+| 4 | 253 | 12:00 | 1200 |
+| 5 | 254 | 16:00 | 1600 |
+| 6 | 255 | 20:00 | 2000 |
+
+Times use decimal HHMM encoding: `raw = hour * 100 + minute`. Period 1 was independently verified at 00:00 (`0`), 00:30 (`30`), and 01:00 (`100`), including restoration to zero. In each screen-based test, inverter 2 inherited the master's setting through the parallel communications link.
+
+An initial FC6 test of address 250 from `0` to `30` timed out and produced no change on either inverter or subsequent FC3 read-back. FC6 is therefore not considered supported for this field. The next controlled test uses FC16 with a quantity of exactly one register through the separately guarded `write-one-fc16` command.
+
 ## Evidence required before integration
 
 A writable field will not be added to Home Assistant until we have recorded:
