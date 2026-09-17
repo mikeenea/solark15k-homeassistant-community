@@ -53,16 +53,16 @@ Tracking issue: #1
 
 ## Phase 4 - Production Home Assistant package
 
-- [ ] Replace `Sol-Ark Test` naming with production per-inverter names
-- [ ] Add complete L1/L2 current and power sensors
+- [x] Replace `Sol-Ark Test` naming with production per-inverter names
+- [x] Add complete L1/L2 current and power sensors
 - [ ] Add availability sensors
 - [ ] Add decoded fault binary sensors
-- [ ] Add grid import/export templates
-- [ ] Add battery charge/discharge templates after sign validation
+- [x] Add grid import/export sensors
+- [x] Add battery charge/discharge sensors after sign validation
 - [ ] Add validated system totals
-- [ ] Add Energy Dashboard-ready entities
+- [x] Add Energy Dashboard-ready entities
 - [ ] Add entity categories where appropriate
-- [ ] Document migration from test package
+- [x] Document migration from test package
 
 ## Phase 5 - Long-term historian
 
@@ -76,16 +76,16 @@ Tracking issue: #1
 
 ## Phase 6 - Grafana dashboards
 
-- [ ] System overview
-- [ ] Dual-inverter balance
-- [ ] PV/MPPT performance
-- [ ] Battery
-- [ ] Grid
+- [x] System overview
+- [x] Dual-inverter balance
+- [x] PV/MPPT performance
+- [x] Battery
+- [x] Grid
 - [ ] Generator/AC-coupled
 - [ ] Fault/event timeline
-- [ ] Monthly/yearly energy
+- [x] Monthly/yearly energy
 - [ ] Year-over-year comparison
-- [ ] Store dashboard JSON in repository
+- [x] Store dashboard JSON in repository
 
 ## Phase 7 - Event analytics
 
@@ -102,10 +102,14 @@ Tracking issue: #1
 
 - [ ] Firmware compatibility table
 - [ ] Community validation reports
-- [ ] Automated YAML/Python validation in CI
+- [x] Automated YAML/Python validation in CI
 - [ ] Register-map unit tests
 - [ ] Optional Modbus response replay tests
 - [ ] Release/versioning policy
+- [x] Public single-inverter deployment guide
+- [x] Public dual-inverter deployment guide
+- [x] Security, contribution, license, notice, and dashboard-provenance documentation
+- [x] HACS custom-repository metadata
 - [ ] First tagged stable release
 
 ## Explicitly out of scope for initial releases
