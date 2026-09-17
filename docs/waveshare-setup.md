@@ -60,8 +60,8 @@ This single-channel unit is suitable for validating the complete path for Sol-Ar
 Example only:
 
 ```text
-Channel 1 / Sol-Ark #1: 192.0.2.241:502
-Channel 2 / Sol-Ark #2: 192.0.2.242:502
+Channel 1 / Sol-Ark #1: XXX.XXX.XXX.XXX:502
+Channel 2 / Sol-Ark #2: XXX.XXX.XXX.XXX:502
 ```
 
 Use addresses appropriate for your LAN and preferably reserve them in DHCP or configure static addresses outside the DHCP pool.
@@ -139,7 +139,7 @@ Then repeat the same settings with a different IP address on the permanent two-c
 From Windows PowerShell:
 
 ```powershell
-Test-NetConnection 192.0.2.241 -Port 502
+Test-NetConnection XXX.XXX.XXX.XXX -Port 502
 ```
 
 Expected result:
@@ -157,8 +157,8 @@ The public Sol-Ark V1.4 map defines the inverter slave ID as `1`.
 Therefore:
 
 ```text
-CH1 endpoint: 192.0.2.241:502, slave 1
-CH2 endpoint: 192.0.2.242:502, slave 1
+CH1 endpoint: XXX.XXX.XXX.XXX:502, slave 1
+CH2 endpoint: XXX.XXX.XXX.XXX:502, slave 1
 ```
 
 Do not substitute the inverter's Parallel-screen Modbus SN as the slave ID for this map.
