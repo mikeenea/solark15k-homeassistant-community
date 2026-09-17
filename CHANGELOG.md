@@ -46,6 +46,7 @@ The project is currently in pre-release field-validation status.
 
 ### Changed
 
+- Made the InfluxDB architecture platform-neutral; the UGREEN NAS is now documented as an optional field-tested example rather than a requirement.
 - Corrected the integration documentation URL.
 - Standardized documentation on the production `sol_ark_15k_1_*` and `sol_ark_15k_2_*` namespaces.
 - Converted the installation checklist from site-specific status reporting to a reusable public checklist.
