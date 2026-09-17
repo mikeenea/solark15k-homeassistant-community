@@ -4,9 +4,9 @@
 No third-party modules are required.
 
 Usage:
-    python solark_modbus_probe.py 192.0.2.20
-    python solark_modbus_probe.py 192.0.2.20 --port 502 --dump
-    python solark_modbus_probe.py 192.0.2.20 --chunk-size 8 --retries 2 --delay 10
+    python solark_modbus_probe.py XXX.XXX.XXX.XXX
+    python solark_modbus_probe.py XXX.XXX.XXX.XXX --port 502 --dump
+    python solark_modbus_probe.py XXX.XXX.XXX.XXX --chunk-size 8 --retries 2 --delay 10
 
 Protocol basis: public Sol-Ark Modbus RTU Protocol V1.4
 - Gateway transport: Modbus TCP -> Modbus RTU
