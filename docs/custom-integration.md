@@ -86,7 +86,23 @@ Search for:
 Sol-Ark 15K Modbus
 ```
 
-For the current single-inverter field test, use the Waveshare TCP endpoint assigned to that inverter, TCP port `502`, and Modbus slave ID `1`.
+For one inverter, add one integration entry using the gateway endpoint assigned to that inverter, TCP port `502`, and Modbus slave ID `1`.
+
+For two parallel inverters, add the integration twice. Use a different gateway endpoint and name for each entry, but retain slave ID `1` for both:
+
+```text
+Sol-Ark 15K #1 -> inverter 1 gateway endpoint -> slave 1
+Sol-Ark 15K #2 -> inverter 2 gateway endpoint -> slave 1
+```
+
+Each entry creates its own Home Assistant device. With the recommended names, the normal entity namespaces are:
+
+```text
+sensor.sol_ark_15k_1_*
+sensor.sol_ark_15k_2_*
+```
+
+See [deployment-guide.md](deployment-guide.md) for the complete branching procedure.
 
 During setup the integration performs one read-only check of holding register `183` (battery voltage). If that succeeds, the integration creates a Home Assistant device and starts the tiered scheduler.
 
