@@ -24,7 +24,7 @@ Confirm:
 From Windows PowerShell:
 
 ```powershell
-Test-NetConnection <gateway-ip> -Port 502
+Test-NetConnection XXX.XXX.XXX.XXX -Port 502
 ```
 
 Expected:
@@ -40,7 +40,7 @@ This proves only that the TCP service is reachable. It does not prove the invert
 Use the included read-only diagnostic:
 
 ```powershell
-py .\tools\solark_single_register_test.py <gateway-ip> 183
+py .\tools\solark_single_register_test.py XXX.XXX.XXX.XXX 183
 ```
 
 Register 183 is battery voltage and is a useful low-risk first target because it is easy to compare with the inverter display.
@@ -48,7 +48,7 @@ Register 183 is battery voltage and is a useful low-risk first target because it
 Expected successful pattern:
 
 ```text
-Connecting to <gateway-ip>:502
+Connecting to XXX.XXX.XXX.XXX:502
 Reading holding register 183, slave 1, FC3, quantity 1
 TX Modbus TCP: ...
 RX Modbus TCP: ...
@@ -88,13 +88,13 @@ Do not assume this same A/B-to-terminal mapping applies to the permanent 2-CH ga
 After a successful single-register read, run:
 
 ```powershell
-py .\tools\solark_modbus_probe.py <gateway-ip>
+py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX
 ```
 
 Then run the raw dump form:
 
 ```powershell
-py .\tools\solark_modbus_probe.py <gateway-ip> --dump
+py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX --dump
 ```
 
 The main probe performs conservative reads over the useful commissioning ranges and decodes representative grid, inverter, load, battery, PV, temperature, relay, fault, and energy-counter values.
