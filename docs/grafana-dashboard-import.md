@@ -63,6 +63,24 @@ sol_ark_15k_
 6. When updating an existing dashboard with the same UID, select **Overwrite**.
 7. Repeat for the other three supported dashboards.
 
+## One-inverter and parallel use
+
+### One inverter
+
+- Select inverter `1` where an inverter selector is present.
+- Import Operational Console, Electrical Trends, and Energy Accounting.
+- Parallel System Detail is optional; its inverter 2 fields will show no data until a second integration entry and its InfluxDB series exist.
+- The default production entity namespace is `sol_ark_15k_1_*` without the Home Assistant `sensor.` domain prefix.
+
+### Two parallel inverters
+
+- Configure and validate two Home Assistant integration entries before importing dashboards.
+- The expected namespaces are `sol_ark_15k_1_*` and `sol_ark_15k_2_*`.
+- Select inverter `1` or `2` for per-inverter dashboards.
+- Select `System` where offered for the combined accounting view.
+- Import Parallel System Detail for side-by-side values and deltas.
+- Do not assume every raw register should be summed; review [dual-inverter.md](dual-inverter.md).
+
 ## Dashboard variables
 
 Open **Dashboard settings → Variables** to customize hidden installation variables.
