@@ -1,12 +1,12 @@
-# UGREEN NAS InfluxDB Deployment
+# Optional Reference: UGREEN NAS InfluxDB Deployment
 
 ## Purpose
 
-The production historian for this project runs on the UGREEN NAS rather than inside Home Assistant OS.
+This document records one field-tested UGREEN NAS deployment. UGREEN hardware is not required: the primary architecture supports any persistent InfluxDB 2.x host described in [`influxdb.md`](influxdb.md).
 
 This separates long-term Sol-Ark history from the Home Assistant host and avoids making the Home Assistant system disk the primary home for multi-year time-series data.
 
-Current field-verified architecture:
+Reference architecture:
 
 ```text
 Sol-Ark 15K #1/#2
@@ -107,7 +107,7 @@ Do not give Grafana write permission unless a future feature specifically requir
 
 Current Home Assistant releases migrate InfluxDB connection/authentication settings away from YAML into the InfluxDB integration configuration entry.
 
-The live connection should point to the NAS:
+For this reference deployment, the live connection points to the NAS:
 
 ```text
 URL:          http://<UGREEN-NAS-IP>:8086
@@ -168,7 +168,7 @@ from(bucket: "solark")
 
 During pre-hardware staging, zero series is expected because the Sol-Ark entities remain `unknown` until the Waveshare gateway is installed and valid Modbus values are received. Unauthorized, bucket-not-found, or connection errors are not expected.
 
-## Current field status
+## Reference deployment status
 
 As of September 2026:
 
@@ -179,7 +179,7 @@ As of September 2026:
 - Grafana has been reconfigured to target the NAS InfluxDB instance;
 - Grafana connection testing succeeds and sees one bucket;
 - the bucket is intentionally empty until live Sol-Ark Modbus values exist;
-- the older Home Assistant-hosted InfluxDB instance is no longer the intended production historian.
+- this installation uses the NAS as its production historian; other installations may use any supported persistent host.
 
 ## Backup and storage notes
 
