@@ -20,10 +20,10 @@ Baud: 9600
 Data bits: 8
 Parity: None
 Stop bits: 1
-Slave ID: 0x01
+Documented default slave ID: 0x01
 ```
 
-The Parallel-screen Modbus SN is separate from this map's fixed slave ID.
+The V1.4 source documents ID 0x01, but field testing confirmed unit ID 2 on a parallel second inverter. Treat unit ID as an endpoint-specific commissioning value.
 
 ## Read-only policy
 

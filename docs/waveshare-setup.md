@@ -152,16 +152,14 @@ This confirms only that the Ethernet/TCP service is reachable. It does **not** c
 
 ## Modbus endpoint model
 
-The public Sol-Ark V1.4 map defines the inverter slave ID as `1`.
-
-Therefore:
+The public Sol-Ark V1.4 map documents unit ID `1`, but a field-tested parallel pair used unit ID `1` for inverter 1 and unit ID `2` for inverter 2. Validate each endpoint with an FC3 read of register 183.
 
 ```text
-CH1 endpoint: XXX.XXX.XXX.XXX:502, slave 1
-CH2 endpoint: XXX.XXX.XXX.XXX:502, slave 1
+Inverter 1 endpoint: XXX.XXX.XXX.XXX:502, unit ID 1
+Inverter 2 endpoint: XXX.XXX.XXX.XXX:502, unit ID 2
 ```
 
-Do not substitute the inverter's Parallel-screen Modbus SN as the slave ID for this map.
+Use the integration's per-entry unit-ID field. Do not assume both parallel inverters share unit ID 1.
 
 ## Timeout settings
 

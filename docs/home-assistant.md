@@ -10,10 +10,10 @@ For the reference two-inverter installation:
 
 ```text
 solark_1 -> Waveshare CH1 IP:502 -> slave 1
-solark_2 -> Waveshare CH2 IP:502 -> slave 1
+solark_2 -> Waveshare CH2 IP:502 -> slave 2
 ```
 
-Each Waveshare channel is a separate TCP endpoint. The public Sol-Ark V1.4 map states that slave ID 1 is fixed for this protocol.
+Each Waveshare channel is a separate TCP endpoint. Unit ID is configured per endpoint; field testing confirmed unit 1 for inverter 1 and unit 2 for inverter 2.
 
 ## Recommended package approach
 

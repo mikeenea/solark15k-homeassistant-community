@@ -17,7 +17,7 @@ Confirm:
 - the gateway is configured for Modbus TCP to Modbus RTU conversion;
 - serial format is 9600 baud, 8 data bits, no parity, 1 stop bit;
 - the Modbus TCP listener is on port 502;
-- the target unit/slave ID is 1.
+- the target unit/slave ID has been identified; start with 1 for a standalone or first inverter and test 2 for a parallel second inverter if ID 1 times out.
 
 ## Step 1 — Ethernet reachability
 
@@ -40,7 +40,7 @@ This proves only that the TCP service is reachable. It does not prove the invert
 Use the included read-only diagnostic:
 
 ```powershell
-py .\tools\solark_single_register_test.py XXX.XXX.XXX.XXX 183
+py .\tools\solark_single_register_test.py XXX.XXX.XXX.XXX 183 --unit-id 1
 ```
 
 Register 183 is battery voltage and is a useful low-risk first target because it is easy to compare with the inverter display.
@@ -79,7 +79,7 @@ raw = 5629 (0x15FD)
 interpreted = 56.29 V
 ```
 
-This proves the PC -> Ethernet -> Waveshare -> RS485 -> Sol-Ark -> RS485 -> Waveshare -> Ethernet -> PC path is functioning for slave 1 / FC3 on the temporary single-channel gateway.
+This proves the PC -> Ethernet -> Waveshare -> RS485 -> Sol-Ark -> RS485 -> Waveshare -> Ethernet -> PC path is functioning for the selected unit ID and FC3.
 
 Do not assume this same A/B-to-terminal mapping applies to the permanent 2-CH gateway; validate each hardware model independently.
 
@@ -88,13 +88,13 @@ Do not assume this same A/B-to-terminal mapping applies to the permanent 2-CH ga
 After a successful single-register read, run:
 
 ```powershell
-py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX
+py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX --unit-id 1
 ```
 
 Then run the raw dump form:
 
 ```powershell
-py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX --dump
+py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX --unit-id 1 --dump
 ```
 
 The main probe performs conservative reads over the useful commissioning ranges and decodes representative grid, inverter, load, battery, PV, temperature, relay, fault, and energy-counter values.
@@ -185,3 +185,14 @@ Observe:
 After Sol-Ark #1 passes, validate Sol-Ark #2 independently using the same process.
 
 Do not create combined system totals until both inverter paths have been individually proven and the per-inverter/system-wide semantics of parallel-mode registers are understood.
+
+
+## Parallel second-inverter unit-ID test
+
+If register 183 times out on a separately addressed second-inverter gateway using unit ID 1, repeat the same read-only request with unit ID 2:
+
+```powershell
+py .\tools\solark_single_register_test.py XXX.XXX.XXX.XXX 183 --unit-id 2
+```
+
+A field-tested parallel Sol-Ark 15K pair returned register 183 on unit ID 1 for inverter 1 and unit ID 2 for inverter 2. Do not change RS485 wiring after one unit ID succeeds.

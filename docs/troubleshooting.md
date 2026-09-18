@@ -63,7 +63,7 @@ Likely causes:
 - wrong physical splitter jack/path;
 - damaged cable.
 
-Verify 9600/8/N/1 and slave ID 1.
+Verify 9600/8/N/1 and test the expected unit ID. Use ID 1 first; on a parallel second inverter, also test ID 2 before changing wiring.
 
 ## Symptom: Modbus exception response
 
@@ -146,7 +146,7 @@ Check HA:
 
 - correct host IP;
 - port 502;
-- `slave: 1`;
+- the configured unit/slave ID matches the ID proven by the register-183 test;
 - `input_type: holding`;
 - valid `data_type`;
 - YAML indentation;
