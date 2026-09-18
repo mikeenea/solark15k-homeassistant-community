@@ -99,7 +99,7 @@
   "timezone": "browser",
   "title": "Sol-Ark Modbus – Electrical Trends",
   "uid": "solark15k-charts",
-  "version": 17,
+  "version": 18,
   "panels": [
     {
       "id": 1,
@@ -234,16 +234,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_battery_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -260,19 +263,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_battery_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -289,10 +292,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -313,8 +312,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_battery_voltage\" or r.entity_id == \"${entity_prefix}2_battery_voltage\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_battery_voltage\") then \"Battery Voltage\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_battery_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_battery_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     },
@@ -344,16 +351,19 @@
             "spanNulls": true,
             "showPoints": "never",
             "axisCenteredZero": true
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_battery_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -370,19 +380,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_battery_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -399,10 +409,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -423,8 +429,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_battery_current\" or r.entity_id == \"${entity_prefix}2_battery_current\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:-1.0*float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_battery_current\") then \"Battery Current\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_battery_current\"))\n|> map(fn:(r)=>({r with _value:-1.0*float(v:r._value)}))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_battery_current\"))\n|> map(fn:(r)=>({r with _value:-1.0*float(v:r._value)}))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     },
@@ -454,16 +468,19 @@
             "spanNulls": true,
             "showPoints": "never",
             "axisCenteredZero": true
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_battery_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -480,19 +497,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_battery_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -509,10 +526,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -533,8 +546,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_battery_power\" or r.entity_id == \"${entity_prefix}2_battery_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:-1.0*float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_battery_power\") then \"Battery Power\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_battery_power\"))\n|> map(fn:(r)=>({r with _value:-1.0*float(v:r._value)}))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_battery_power\"))\n|> map(fn:(r)=>({r with _value:-1.0*float(v:r._value)}))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     },
@@ -565,16 +586,19 @@
             "showPoints": "never"
           },
           "min": 0,
-          "max": 100,
-          "displayName": "${__field.labels.entity_id}"
+          "max": 100
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_battery_state_of_charge.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -591,19 +615,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_battery_state_of_charge.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -620,10 +644,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -644,8 +664,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_battery_state_of_charge\" or r.entity_id == \"${entity_prefix}2_battery_state_of_charge\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_battery_state_of_charge\") then \"Battery SOC\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_battery_state_of_charge\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_battery_state_of_charge\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     },
@@ -674,16 +702,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_battery_temperature.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -700,19 +731,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_battery_temperature.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -729,10 +760,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -753,8 +780,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_battery_temperature\" or r.entity_id == \"${entity_prefix}2_battery_temperature\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_battery_temperature\") then \"Battery Temperature\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_battery_temperature\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_battery_temperature\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     },
@@ -783,16 +818,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_heat_sink_temperature.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -809,19 +847,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_heat_sink_temperature.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -838,10 +876,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -862,8 +896,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_heat_sink_temperature\" or r.entity_id == \"${entity_prefix}2_heat_sink_temperature\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_heat_sink_temperature\") then \"Heat Sink Temperature\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_heat_sink_temperature\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_heat_sink_temperature\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     },
@@ -892,16 +934,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv1_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -918,19 +963,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv1_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -947,10 +992,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -974,7 +1015,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv1_voltage\" or r.entity_id == \"${entity_prefix}2_pv1_voltage\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv1_voltage\") then \"MPPT 1 Voltage\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv1_voltage\" or r.entity_id==\"${entity_prefix}2_pv1_voltage\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1003,16 +1044,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv1_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1029,19 +1073,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv1_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1058,10 +1102,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1085,7 +1125,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv1_power\" or r.entity_id == \"${entity_prefix}2_pv1_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv1_power\") then \"MPPT 1 Power\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv1_power\" or r.entity_id==\"${entity_prefix}2_pv1_power\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1114,16 +1154,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv1_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1140,19 +1183,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv1_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1169,10 +1212,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1196,7 +1235,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv1_current\" or r.entity_id == \"${entity_prefix}2_pv1_current\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv1_current\") then \"MPPT 1 Current\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv1_current\" or r.entity_id==\"${entity_prefix}2_pv1_current\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1225,16 +1264,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv2_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1251,19 +1293,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv2_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1280,10 +1322,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1307,7 +1345,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv2_voltage\" or r.entity_id == \"${entity_prefix}2_pv2_voltage\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv2_voltage\") then \"MPPT 2 Voltage\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv2_voltage\" or r.entity_id==\"${entity_prefix}2_pv2_voltage\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1336,16 +1374,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv2_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1362,19 +1403,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv2_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1391,10 +1432,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1418,7 +1455,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv2_power\" or r.entity_id == \"${entity_prefix}2_pv2_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv2_power\") then \"MPPT 2 Power\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv2_power\" or r.entity_id==\"${entity_prefix}2_pv2_power\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1447,16 +1484,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv2_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1473,19 +1513,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv2_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1502,10 +1542,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1529,7 +1565,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv2_current\" or r.entity_id == \"${entity_prefix}2_pv2_current\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv2_current\") then \"MPPT 2 Current\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv2_current\" or r.entity_id==\"${entity_prefix}2_pv2_current\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1558,16 +1594,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv3_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1584,19 +1623,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv3_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1613,10 +1652,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1640,7 +1675,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv3_voltage\" or r.entity_id == \"${entity_prefix}2_pv3_voltage\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv3_voltage\") then \"MPPT 3 Voltage\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv3_voltage\" or r.entity_id==\"${entity_prefix}2_pv3_voltage\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1669,16 +1704,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv3_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1695,19 +1733,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv3_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1724,10 +1762,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1751,7 +1785,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv3_power\" or r.entity_id == \"${entity_prefix}2_pv3_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv3_power\") then \"MPPT 3 Power\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv3_power\" or r.entity_id==\"${entity_prefix}2_pv3_power\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1780,16 +1814,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_pv3_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1806,19 +1843,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_pv3_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1835,10 +1872,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -1862,7 +1895,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_pv3_current\" or r.entity_id == \"${entity_prefix}2_pv3_current\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_pv3_current\") then \"MPPT 3 Current\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])"
+          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_pv3_current\" or r.entity_id==\"${entity_prefix}2_pv3_current\"))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)"
         }
       ]
     },
@@ -1891,16 +1924,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_load_l1_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Load L1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1917,19 +1953,77 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_1_load_l2_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Load L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_1_load_total_power.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Load Total"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_load_l1_power.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Load L1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -1946,10 +2040,64 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_load_l2_power.*"
+            },
+            "properties": [
               {
                 "id": "displayName",
-                "value": "Inverter 2"
+                "value": "Inv 2 · Load L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_load_total_power.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Load Total"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
               }
             ]
           }
@@ -1970,8 +2118,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_load_total_power\" or r.entity_id == \"${entity_prefix}2_load_total_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_load_total_power\") then \"Load Power\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_l1_power\" or r.entity_id==\"${entity_prefix}1_load_l2_power\" or r.entity_id==\"${entity_prefix}1_load_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_l1_power\" or r.entity_id==\"${entity_prefix}2_load_l2_power\" or r.entity_id==\"${entity_prefix}2_load_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     },
@@ -2000,16 +2156,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_load_l1_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Load L1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2032,9 +2191,129 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_1_load_l2_current.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Load L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_1_load_total_current.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Load Total"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_load_l1_current.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Load L1"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_load_l2_current.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Load L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_load_total_current.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Load Total"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2071,8 +2350,32 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_load_l1_current\" or r.entity_id == \"${entity_prefix}2_load_l1_current\" or r.entity_id == \"${entity_prefix}1_load_l2_current\" or r.entity_id == \"${entity_prefix}2_load_l2_current\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividualLegs = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_load_l1_current\") then \"Load L1\" else if strings.hasSuffix(v:r.entity_id,suffix:\"_load_l2_current\") then \"Load L2\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\ninv1Total = base\n  |> filter(fn:(r)=>strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\"))\n  |> group(columns:[\"_time\"])\n  |> sum(column:\"_value\")\n  |> map(fn:(r)=>({r with entity_id:\"Inv 1 · Load Total\"}))\n  |> group(columns:[\"entity_id\"])\n\ninv2Total = base\n  |> filter(fn:(r)=>strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}2_\"))\n  |> group(columns:[\"_time\"])\n  |> sum(column:\"_value\")\n  |> map(fn:(r)=>({r with entity_id:\"Inv 2 · Load Total\"}))\n  |> group(columns:[\"entity_id\"])\n\nunion(tables:[individualLegs,inv1Total,inv2Total])\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_l1_current\" or r.entity_id==\"${entity_prefix}1_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_l1_current\" or r.entity_id==\"${entity_prefix}1_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n|> map(fn:(r)=>({r with phase:if r.entity_id==\"${entity_prefix}1_load_l1_current\" then \"l1\" else \"l2\"}))\n|> keep(columns:[\"_time\",\"_value\",\"phase\"])\n|> pivot(rowKey:[\"_time\"],columnKey:[\"phase\"],valueColumn:\"_value\")\n|> filter(fn:(r)=>exists r.l1 and exists r.l2)\n|> map(fn:(r)=>({_time:r._time,_value:float(v:r.l1)+float(v:r.l2),entity_id:\"${entity_prefix}1_load_total_current\",_field:\"value\"}))",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_l1_current\" or r.entity_id==\"${entity_prefix}2_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_l1_current\" or r.entity_id==\"${entity_prefix}2_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n|> map(fn:(r)=>({r with phase:if r.entity_id==\"${entity_prefix}2_load_l1_current\" then \"l1\" else \"l2\"}))\n|> keep(columns:[\"_time\",\"_value\",\"phase\"])\n|> pivot(rowKey:[\"_time\"],columnKey:[\"phase\"],valueColumn:\"_value\")\n|> filter(fn:(r)=>exists r.l1 and exists r.l2)\n|> map(fn:(r)=>({_time:r._time,_value:float(v:r.l1)+float(v:r.l2),entity_id:\"${entity_prefix}2_load_total_current\",_field:\"value\"}))",
+          "refId": "D"
         }
       ]
     },
@@ -2101,16 +2404,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_load_frequency.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2127,19 +2433,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_load_frequency.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2156,10 +2462,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -2180,8 +2482,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_load_frequency\" or r.entity_id == \"${entity_prefix}2_load_frequency\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_load_frequency\") then \"Load Frequency\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_frequency\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_frequency\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "refId": "B"
         }
       ]
     },
@@ -2211,16 +2521,19 @@
             "spanNulls": true,
             "showPoints": "never",
             "axisCenteredZero": true
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_grid_l1_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Grid L1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2243,9 +2556,129 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_1_grid_l2_power.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Grid L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_1_grid_total_power.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Grid Total"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_grid_l1_power.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Grid L1"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_grid_l2_power.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Grid L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_grid_total_power.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Grid Total"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2282,8 +2715,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_grid_l1_power\" or r.entity_id == \"${entity_prefix}2_grid_l1_power\" or r.entity_id == \"${entity_prefix}1_grid_l2_power\" or r.entity_id == \"${entity_prefix}2_grid_l2_power\" or r.entity_id == \"${entity_prefix}1_grid_total_power\" or r.entity_id == \"${entity_prefix}2_grid_total_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_grid_l1_power\") then \"Grid L1\" else if strings.hasSuffix(v:r.entity_id,suffix:\"_grid_l2_power\") then \"Grid L2\" else if strings.hasSuffix(v:r.entity_id,suffix:\"_grid_total_power\") then \"Grid Total\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_grid_l1_power\" or r.entity_id==\"${entity_prefix}1_grid_l2_power\" or r.entity_id==\"${entity_prefix}1_grid_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_grid_l1_power\" or r.entity_id==\"${entity_prefix}2_grid_l2_power\" or r.entity_id==\"${entity_prefix}2_grid_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "refId": "B"
         }
       ]
     },
@@ -2312,16 +2753,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_grid_l1_n_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Grid L1-N"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2344,9 +2788,129 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_1_grid_l2_n_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Grid L2-N"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_1_grid_l1_l2_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · Grid L1-L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_grid_l1_n_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Grid L1-N"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_grid_l2_n_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Grid L2-N"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_grid_l1_l2_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · Grid L1-L2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2383,8 +2947,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_grid_l1_n_voltage\" or r.entity_id == \"${entity_prefix}2_grid_l1_n_voltage\" or r.entity_id == \"${entity_prefix}1_grid_l2_n_voltage\" or r.entity_id == \"${entity_prefix}2_grid_l2_n_voltage\" or r.entity_id == \"${entity_prefix}1_grid_l1_l2_voltage\" or r.entity_id == \"${entity_prefix}2_grid_l1_l2_voltage\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_grid_l1_n_voltage\") then \"Grid L1-N\" else if strings.hasSuffix(v:r.entity_id,suffix:\"_grid_l2_n_voltage\") then \"Grid L2-N\" else if strings.hasSuffix(v:r.entity_id,suffix:\"_grid_l1_l2_voltage\") then \"Grid L1-L2\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_grid_l1_n_voltage\" or r.entity_id==\"${entity_prefix}1_grid_l2_n_voltage\" or r.entity_id==\"${entity_prefix}1_grid_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_grid_l1_n_voltage\" or r.entity_id==\"${entity_prefix}2_grid_l2_n_voltage\" or r.entity_id==\"${entity_prefix}2_grid_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "refId": "B"
         }
       ]
     },
@@ -2413,16 +2985,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_grid_frequency.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 1"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2439,19 +3014,19 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 1"
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_2_grid_frequency.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inverter 2"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2468,10 +3043,6 @@
                 "value": {
                   "fill": "solid"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Inverter 2"
               }
             ]
           }
@@ -2492,8 +3063,16 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_grid_frequency\" or r.entity_id == \"${entity_prefix}2_grid_frequency\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_grid_frequency\") then \"Grid Frequency\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_grid_frequency\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_grid_frequency\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "refId": "B"
         }
       ]
     },
@@ -2522,16 +3101,19 @@
             "gradientMode": "opacity",
             "spanNulls": true,
             "showPoints": "never"
-          },
-          "displayName": "${__field.labels.entity_id}"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 1 ·.*"
+              "options": ".*_1_inverter_l1_n_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · L1-N"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2548,15 +3130,113 @@
                 "value": {
                   "fill": "solid"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "min",
+                "value": 100
+              },
+              {
+                "id": "max",
+                "value": 140
               }
             ]
           },
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*Inv 2 ·.*"
+              "options": ".*_1_inverter_l2_n_voltage.*"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · L2-N"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "min",
+                "value": 100
+              },
+              {
+                "id": "max",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_1_inverter_l1_l2_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 1 · L1-L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794F2"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "min",
+                "value": 220
+              },
+              {
+                "id": "max",
+                "value": 260
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_inverter_l1_n_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · L1-N"
+              },
               {
                 "id": "color",
                 "value": {
@@ -2573,6 +3253,100 @@
                 "value": {
                   "fill": "solid"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "min",
+                "value": 100
+              },
+              {
+                "id": "max",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_inverter_l2_n_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · L2-N"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "min",
+                "value": 100
+              },
+              {
+                "id": "max",
+                "value": 140
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*_2_inverter_l1_l2_voltage.*"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Inv 2 · L1-L2"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "min",
+                "value": 220
+              },
+              {
+                "id": "max",
+                "value": 260
               }
             ]
           }
@@ -2593,11 +3367,19 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"strings\"\n\nbase = from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id == \"${entity_prefix}1_inverter_l1_n_voltage\" or r.entity_id == \"${entity_prefix}2_inverter_l1_n_voltage\" or r.entity_id == \"${entity_prefix}1_inverter_l2_n_voltage\" or r.entity_id == \"${entity_prefix}2_inverter_l2_n_voltage\" or r.entity_id == \"${entity_prefix}1_inverter_l1_l2_voltage\" or r.entity_id == \"${entity_prefix}2_inverter_l1_l2_voltage\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n\nindividual = base\n  |> map(fn:(r)=>({r with entity_id:(if strings.containsStr(v:r.entity_id,substr:\"${entity_prefix}1_\") then \"Inv 1 · \" else \"Inv 2 · \") + (if strings.hasSuffix(v:r.entity_id,suffix:\"_inverter_l1_n_voltage\") then \"L1-N\" else if strings.hasSuffix(v:r.entity_id,suffix:\"_inverter_l2_n_voltage\") then \"L2-N\" else if strings.hasSuffix(v:r.entity_id,suffix:\"_inverter_l1_l2_voltage\") then \"L1-L2\" else \"Unknown\")}))\n  |> group(columns:[\"entity_id\"])\n\nindividual\n  |> sort(columns:[\"_time\"])",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_inverter_l1_n_voltage\" or r.entity_id==\"${entity_prefix}1_inverter_l2_n_voltage\" or r.entity_id==\"${entity_prefix}1_inverter_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_inverter_l1_n_voltage\" or r.entity_id==\"${entity_prefix}2_inverter_l2_n_voltage\" or r.entity_id==\"${entity_prefix}2_inverter_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "refId": "B"
         }
       ]
     }
   ],
-  "description": "Electrical trends with a combined system power overview and simultaneous Inverter 1 and Inverter 2 overlays on each detailed chart."
+  "description": "Electrical trends using the original validated entity queries, with a combined system power overview and simultaneous Inverter 1 and Inverter 2 overlays."
 }
