@@ -48,142 +48,36 @@ Decoded battery voltage: 54.61 V
 
 This confirms that unit ID can follow the inverter's parallel addressing on at least some Sol-Ark 15K firmware.
 
-## Why not sum immediately
+## Built-in x2 system device
 
-In a parallel system, some registers may be:
-
-- local to each inverter;
-- duplicated on both inverters;
-- reported only by the master;
-- calculated as a system-wide value by firmware.
-
-Blindly summing duplicated system values would double-count power and energy.
-
-## Validation matrix
-
-Capture simultaneous values from inverter #1, inverter #2, and the Sol-Ark system display.
-
-| Register | Measurement | Validation question |
-|---:|---|---|
-| 169 | Grid total power | per inverter or system-wide? |
-| 172 | External CT total power | duplicated CT reading or per inverter? |
-| 175 | Inverter total power | likely per inverter; verify |
-| 178 | Load total power | per inverter or system-wide? |
-| 190 | Battery power | local conversion path or total bank? |
-| 191 | Battery current | local or system-wide? |
-| 108 | Daily PV energy | per inverter? |
-| 76/77 | Daily grid import/export | per inverter or duplicated? |
-| 84 | Daily load energy | per inverter or system-wide? |
-| 96/97 | Lifetime PV | per inverter? |
-
-## Suggested validation procedure
-
-Perform several operating states:
-
-### State A: moderate daytime PV
-
-Record:
+When exactly two Sol-Ark integration entries are active, version 0.3.0 and later automatically creates a virtual Home Assistant device named **Sol-Ark 15K x2**. Its entities use this namespace:
 
 ```text
-PV #1
-PV #2
-Inverter output #1
-Inverter output #2
-System PV/output on LCD
+sensor.sol_ark_15k_x2_*
 ```
 
-### State B: battery charging
+No template package is required. The original inverter 1 and inverter 2 entities remain available for comparison and diagnostics.
 
-Record:
+### Aggregation rules
 
-```text
-Battery power #1
-Battery power #2
-Battery current #1
-Battery current #2
-System battery power/current
-```
+| Measurement family | x2 calculation |
+|---|---|
+| PV, load, grid, generator, and battery power | Sum |
+| PV, load, grid, and battery current | Sum |
+| Daily and lifetime energy counters | Sum |
+| MPPT 1, MPPT 2, and MPPT 3 voltage | Arithmetic mean of the two matching inverter values |
+| Grid and inverter 240 V voltage | Arithmetic mean |
+| Generator voltage and frequency | Arithmetic mean |
+| Load frequency | Arithmetic mean |
+| Battery voltage and state of charge | Arithmetic mean |
 
-### State C: battery discharging
+MPPT voltages are averaged only between matching inputs: MPPT 1 with MPPT 1, MPPT 2 with MPPT 2, and MPPT 3 with MPPT 3. Generator energy is not created because the current register map does not expose a validated generator-energy counter.
 
-Repeat the same readings and verify sign direction.
+The x2 entities become unavailable if either inverter feed is unavailable. This avoids silently treating a failed inverter connection as zero. A one-inverter installation receives no x2 device and behaves exactly as before.
 
-### State D: grid import
+## Field-validation basis
 
-Record register 169 from both inverters and the system display.
-
-### State E: grid export
-
-Repeat while exporting if possible.
-
-### State F: large load
-
-Observe load registers 176-178 on both inverters and compare to actual/system load.
-
-## Classification outcomes
-
-For each register, classify it as one of:
-
-```text
-PER_INVERTER
-SYSTEM_DUPLICATED
-MASTER_ONLY
-SLAVE_ONLY
-UNKNOWN
-```
-
-Record the classification in an issue or future compatibility table.
-
-## System-level templates
-
-Only values classified as `PER_INVERTER` should normally be summed.
-
-Example for total inverter output after validation:
-
-```yaml
-template:
-  - sensor:
-      - name: "Sol-Ark System Inverter Power"
-        unit_of_measurement: "W"
-        device_class: power
-        state_class: measurement
-        state: >
-          {{ states('sensor.sol_ark_15k_1_inverter_total_power') | float(0)
-           + states('sensor.sol_ark_15k_2_inverter_total_power') | float(0) }}
-```
-
-Example for system PV after confirming each inverter's PV registers are local:
-
-```yaml
-      - name: "Sol-Ark System PV Power"
-        unit_of_measurement: "W"
-        device_class: power
-        state_class: measurement
-        state: >
-          {{ states('sensor.sol_ark_15k_1_pv_total_power') | float(0)
-           + states('sensor.sol_ark_15k_2_pv_total_power') | float(0) }}
-```
-
-## Duplicated values
-
-If both inverters report the same system-wide CT value, do not sum them. Instead:
-
-- select the master as authoritative; or
-- create a consistency check comparing both values.
-
-Example consistency sensor concept:
-
-```text
-abs(CT master - CT slave) < tolerance
-```
-
-A disagreement could become a diagnostic indicator.
-
-## Availability handling
-
-System templates should not silently convert an unavailable inverter to zero during normal operation unless that behavior is explicitly desired.
-
-Prefer availability templates requiring both inputs when the quantity truly depends on both inverters.
+The aggregation rules were selected after live validation of two parallel Sol-Ark 15K inverters, with independent Modbus connections and comparison against Home Assistant, inverter screens, and system behavior. The master continues to coordinate operating settings with the slave through the inverters' parallel communications link; telemetry is still collected independently from both Modbus endpoints.
 
 ## Failover considerations
 

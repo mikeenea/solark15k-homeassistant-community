@@ -4,7 +4,7 @@ A local, read-only Home Assistant integration for one Sol-Ark 15K inverter or tw
 
 This project provides independent, local access to inverter telemetry through documented Sol-Ark Modbus interfaces, Home Assistant, InfluxDB, and Grafana. A standalone installation uses one isolated RS485 endpoint. A parallel installation uses two isolated endpoints, one per inverter.
 
-> **Project status:** stable single-inverter monitoring; parallel-inverter aggregation remains under field validation. The public release is read-only.
+> **Project status:** stable read-only monitoring for one inverter and field-validated monitoring for two parallel inverters, including automatic x2 system entities.
 
 ## Start here
 
@@ -13,11 +13,11 @@ For one inverter, use the concise [Single-Inverter Quick Start](docs/single-inve
 Use the [deployment guide](docs/deployment-guide.md) for the complete one- or two-inverter sequence:
 
 - **One inverter:** one gateway endpoint, one Home Assistant integration entry, and the inverter `1` dashboard selection.
-- **Two parallel inverters:** two electrically independent RS485 endpoints, two Home Assistant integration entries, and inverter `1`, inverter `2`, and system/parallel dashboard views.
+- **Two parallel inverters:** two electrically independent RS485 endpoints and two Home Assistant integration entries. The integration automatically creates a `Sol-Ark 15K x2` device with combined system entities, while retaining inverter `1` and inverter `2` entities.
 
 Field-validation history is recorded in [single-inverter-validation.md](docs/single-inverter-validation.md). Users do not need to repeat the development tests when their installation is operating normally. Parallel-system details are in [dual-inverter.md](docs/dual-inverter.md).
 
-For both configurations, the Sol-Ark Modbus slave ID remains `1`. Parallel inverters are distinguished by separate TCP endpoints, not by changing the slave ID.
+Each inverter uses its own TCP endpoint. Confirm the Modbus unit ID independently: field testing found unit ID `1` on inverter 1 and unit ID `2` on inverter 2.
 
 ### Quick installation outline
 
@@ -25,7 +25,7 @@ For both configurations, the Sol-Ark Modbus slave ID remains `1`. Parallel inver
 2. Validate each inverter independently with `tools/solark_modbus_probe.py`.
 3. Install `custom_components/solark15k` manually or as a HACS custom repository.
 4. Add one integration entry per inverter.
-5. Configure InfluxDB export for `sensor.sol_ark_15k_1_*` and, when present, `sensor.sol_ark_15k_2_*`.
+5. Configure InfluxDB export for `sensor.sol_ark_15k_1_*`, `sensor.sol_ark_15k_2_*`, and the automatically created `sensor.sol_ark_15k_x2_*` system entities.
 6. Import the four supported Grafana dashboards and select the correct bucket/data source.
 
 ## What this project provides
@@ -36,7 +36,7 @@ For both configurations, the Sol-Ark Modbus slave ID remains `1`. Parallel inver
 - A no-dependency Python Modbus TCP probe for commissioning.
 - A working register reference derived from the public Sol-Ark Modbus RTU Protocol V1.4.
 - Single-inverter commissioning before dual-inverter deployment.
-- Dual-inverter design and aggregation guidance.
+- Automatic dual-inverter x2 entities: summed power/current/energy and arithmetic-mean corresponding voltages.
 - Home Assistant dashboard examples.
 - InfluxDB long-term retention design.
 - Platform-neutral InfluxDB deployment guidance, plus a tested UGREEN NAS example.
@@ -178,7 +178,7 @@ Do not begin by connecting both inverters.
 8. Validate signed values and temperature scaling.
 9. Run for a stability period.
 10. Repeat on Sol-Ark #2 / Waveshare channel 2, or move the temporary single-channel test gateway to Sol-Ark #2.
-11. Only then build combined dual-inverter sensors.
+11. After both entries are active, confirm the automatically created `Sol-Ark 15K x2` device and its combined entities.
 
 See [`docs/first-test.md`](docs/first-test.md).
 
@@ -209,7 +209,8 @@ See [`docs/first-test.md`](docs/first-test.md).
 │       ├── manifest.json
 │       ├── config_flow.py
 │       ├── coordinator.py
-│       └── sensor.py
+│       ├── sensor.py
+│       └── system_sensor.py
 ├── grafana/
 │   └── dashboards/
 │       ├── solark15k-operational-overview.json
