@@ -2,7 +2,22 @@
 
 All notable project changes will be documented here.
 
-Single-inverter monitoring is stable. Parallel-inverter aggregation remains in field validation.
+Single-inverter monitoring and the field-validated two-inverter read path are stable. Built-in x2 aggregation is available when exactly two entries are active.
+
+## [0.3.0] - 2026-09-18
+
+### Added
+
+- Automatic `Sol-Ark 15K x2` virtual device when exactly two inverter entries are active.
+- Combined `sensor.sol_ark_15k_x2_*` entities for PV, load, grid, generator, and battery measurements.
+- Arithmetic-mean x2 sensors for corresponding MPPT voltages and other shared voltages, frequencies, battery voltage, and battery state of charge.
+- Summed x2 current, power, and energy sensors, including calculated total PV, load, and grid current.
+
+### Changed
+
+- Preserved all individual inverter entities while removing the need for user-authored Home Assistant aggregation templates.
+- Kept single-inverter installations unchanged; x2 entities are created only with exactly two active entries.
+
 
 ## [0.2.2] - 2026-09-17
 
