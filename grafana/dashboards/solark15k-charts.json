@@ -99,7 +99,7 @@
   "timezone": "browser",
   "title": "Sol-Ark Modbus – Electrical Trends",
   "uid": "solark15k-charts",
-  "version": 19,
+  "version": 20,
   "panels": [
     {
       "id": 1,
@@ -1930,128 +1930,12 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*_1_load_l1_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Load L1"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_1_load_l2_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Load L2"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
               "options": ".*_1_load_total_power.*"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 1 · Load Total"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_load_l1_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Load L1"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_load_l2_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Load L2"
+                "value": "Inverter 1"
               },
               {
                 "id": "color",
@@ -2080,7 +1964,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 2 · Load Total"
+                "value": "Inverter 2"
               },
               {
                 "id": "color",
@@ -2118,7 +2002,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_l1_power\" or r.entity_id==\"${entity_prefix}1_load_l2_power\" or r.entity_id==\"${entity_prefix}1_load_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
         },
         {
@@ -2126,7 +2010,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_l1_power\" or r.entity_id==\"${entity_prefix}2_load_l2_power\" or r.entity_id==\"${entity_prefix}2_load_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "B"
         }
       ]
@@ -2162,128 +2046,12 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*_1_load_l1_current.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Load L1"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_1_load_l2_current.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Load L2"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
               "options": ".*_1_load_total_current.*"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 1 · Load Total"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_load_l1_current.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Load L1"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_load_l2_current.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Load L2"
+                "value": "Inverter 1"
               },
               {
                 "id": "color",
@@ -2312,7 +2080,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 2 · Load Total"
+                "value": "Inverter 2"
               },
               {
                 "id": "color",
@@ -2350,7 +2118,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_l1_current\" or r.entity_id==\"${entity_prefix}1_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_l1_current\" or r.entity_id==\"${entity_prefix}1_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n|> map(fn:(r)=>({r with phase:if r.entity_id==\"${entity_prefix}1_load_l1_current\" then \"l1\" else \"l2\"}))\n|> keep(columns:[\"_time\",\"_value\",\"phase\"])\n|> pivot(rowKey:[\"_time\"],columnKey:[\"phase\"],valueColumn:\"_value\")\n|> filter(fn:(r)=>exists r.l1 and exists r.l2)\n|> map(fn:(r)=>({_time:r._time,_value:float(v:r.l1)+float(v:r.l2),entity_id:\"${entity_prefix}1_load_total_current\",_field:\"value\"}))",
           "refId": "A"
         },
         {
@@ -2358,24 +2126,8 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_load_l1_current\" or r.entity_id==\"${entity_prefix}1_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n|> map(fn:(r)=>({r with phase:if r.entity_id==\"${entity_prefix}1_load_l1_current\" then \"l1\" else \"l2\"}))\n|> keep(columns:[\"_time\",\"_value\",\"phase\"])\n|> pivot(rowKey:[\"_time\"],columnKey:[\"phase\"],valueColumn:\"_value\")\n|> filter(fn:(r)=>exists r.l1 and exists r.l2)\n|> map(fn:(r)=>({_time:r._time,_value:float(v:r.l1)+float(v:r.l2),entity_id:\"${entity_prefix}1_load_total_current\",_field:\"value\"}))",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
-          },
-          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_l1_current\" or r.entity_id==\"${entity_prefix}2_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "${DS_INFLUXDB}"
-          },
           "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_load_l1_current\" or r.entity_id==\"${entity_prefix}2_load_l2_current\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n|> map(fn:(r)=>({r with phase:if r.entity_id==\"${entity_prefix}2_load_l1_current\" then \"l1\" else \"l2\"}))\n|> keep(columns:[\"_time\",\"_value\",\"phase\"])\n|> pivot(rowKey:[\"_time\"],columnKey:[\"phase\"],valueColumn:\"_value\")\n|> filter(fn:(r)=>exists r.l1 and exists r.l2)\n|> map(fn:(r)=>({_time:r._time,_value:float(v:r.l1)+float(v:r.l2),entity_id:\"${entity_prefix}2_load_total_current\",_field:\"value\"}))",
-          "refId": "D"
+          "refId": "B"
         }
       ]
     },
@@ -2527,128 +2279,12 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*_1_grid_l1_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Grid L1"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_1_grid_l2_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Grid L2"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
               "options": ".*_1_grid_total_power.*"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 1 · Grid Total"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_grid_l1_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Grid L1"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_grid_l2_power.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Grid L2"
+                "value": "Inverter 1"
               },
               {
                 "id": "color",
@@ -2677,7 +2313,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 2 · Grid Total"
+                "value": "Inverter 2"
               },
               {
                 "id": "color",
@@ -2715,7 +2351,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_grid_l1_power\" or r.entity_id==\"${entity_prefix}1_grid_l2_power\" or r.entity_id==\"${entity_prefix}1_grid_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_grid_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "A"
         },
         {
@@ -2723,7 +2359,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_grid_l1_power\" or r.entity_id==\"${entity_prefix}2_grid_l2_power\" or r.entity_id==\"${entity_prefix}2_grid_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_grid_total_power\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "B"
         }
       ]
@@ -2731,7 +2367,7 @@
     {
       "id": 14,
       "type": "timeseries",
-      "title": "Grid Voltage",
+      "title": "Grid Voltage — L1–L2",
       "datasource": {
         "type": "influxdb",
         "uid": "${DS_INFLUXDB}"
@@ -2759,70 +2395,12 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*_1_grid_l1_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Grid L1-N"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_1_grid_l2_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · Grid L2-N"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
               "options": ".*_1_grid_l1_l2_voltage.*"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 1 · Grid L1-L2"
+                "value": "Inverter 1"
               },
               {
                 "id": "color",
@@ -2840,64 +2418,18 @@
                 "value": {
                   "fill": "solid"
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_grid_l1_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Grid L1-N"
               },
               {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
+                "id": "custom.axisPlacement",
+                "value": "auto"
               },
               {
-                "id": "custom.lineWidth",
-                "value": 2
+                "id": "min",
+                "value": 220
               },
               {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_grid_l2_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · Grid L2-N"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
+                "id": "max",
+                "value": 260
               }
             ]
           },
@@ -2909,7 +2441,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 2 · Grid L1-L2"
+                "value": "Inverter 2"
               },
               {
                 "id": "color",
@@ -2927,6 +2459,18 @@
                 "value": {
                   "fill": "solid"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "auto"
+              },
+              {
+                "id": "min",
+                "value": 220
+              },
+              {
+                "id": "max",
+                "value": 260
               }
             ]
           }
@@ -2947,7 +2491,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_grid_l1_n_voltage\" or r.entity_id==\"${entity_prefix}1_grid_l2_n_voltage\" or r.entity_id==\"${entity_prefix}1_grid_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_grid_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "A"
         },
         {
@@ -2955,7 +2499,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_grid_l1_n_voltage\" or r.entity_id==\"${entity_prefix}2_grid_l2_n_voltage\" or r.entity_id==\"${entity_prefix}2_grid_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
+          "query": "import \"date\"\n\nfrom(bucket:\"${bucket}\")\n|> range(start:date.sub(d:7d,from:v.timeRangeStart),stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_grid_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:true)\n|> fill(column:\"_value\",usePrevious:true)\n|> filter(fn:(r)=>r._time>=v.timeRangeStart)",
           "refId": "B"
         }
       ]
@@ -3079,7 +2623,7 @@
     {
       "id": 18,
       "type": "timeseries",
-      "title": "AC Voltage — Line and Leg Detail",
+      "title": "AC Voltage — L1–L2",
       "datasource": {
         "type": "influxdb",
         "uid": "${DS_INFLUXDB}"
@@ -3107,94 +2651,12 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*_1_inverter_l1_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · L1-N"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "left"
-              },
-              {
-                "id": "min",
-                "value": 100
-              },
-              {
-                "id": "max",
-                "value": 140
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_1_inverter_l2_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 1 · L2-N"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "left"
-              },
-              {
-                "id": "min",
-                "value": 100
-              },
-              {
-                "id": "max",
-                "value": 140
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
               "options": ".*_1_inverter_l1_l2_voltage.*"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 1 · L1-L2"
+                "value": "Inverter 1"
               },
               {
                 "id": "color",
@@ -3215,7 +2677,7 @@
               },
               {
                 "id": "custom.axisPlacement",
-                "value": "right"
+                "value": "auto"
               },
               {
                 "id": "min",
@@ -3230,94 +2692,12 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*_2_inverter_l1_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · L1-N"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "left"
-              },
-              {
-                "id": "min",
-                "value": 100
-              },
-              {
-                "id": "max",
-                "value": 140
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*_2_inverter_l2_n_voltage.*"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Inv 2 · L2-N"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#E5AC0E"
-                }
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 2
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "solid"
-                }
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "left"
-              },
-              {
-                "id": "min",
-                "value": 100
-              },
-              {
-                "id": "max",
-                "value": 140
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
               "options": ".*_2_inverter_l1_l2_voltage.*"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Inv 2 · L1-L2"
+                "value": "Inverter 2"
               },
               {
                 "id": "color",
@@ -3338,7 +2718,7 @@
               },
               {
                 "id": "custom.axisPlacement",
-                "value": "right"
+                "value": "auto"
               },
               {
                 "id": "min",
@@ -3367,7 +2747,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_inverter_l1_n_voltage\" or r.entity_id==\"${entity_prefix}1_inverter_l2_n_voltage\" or r.entity_id==\"${entity_prefix}1_inverter_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}1_inverter_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "A"
         },
         {
@@ -3375,11 +2755,11 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_inverter_l1_n_voltage\" or r.entity_id==\"${entity_prefix}2_inverter_l2_n_voltage\" or r.entity_id==\"${entity_prefix}2_inverter_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
+          "query": "from(bucket:\"${bucket}\")\n|> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n|> filter(fn:(r)=>r._field==\"value\")\n|> filter(fn:(r)=>(r.entity_id==\"${entity_prefix}2_inverter_l1_l2_voltage\"))\n|> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)",
           "refId": "B"
         }
       ]
     }
   ],
-  "description": "Electrical trends using validated entity queries, with a combined system power overview and same-color Inverter 1 and Inverter 2 overlays on each detailed chart."
+  "description": "Electrical trends with combined L1–L2 and total-power/current readings; individual 120 V leg traces are omitted."
 }
