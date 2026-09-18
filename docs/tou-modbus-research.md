@@ -17,7 +17,7 @@ This work is isolated on the `dev/tou-modbus-research` branch. The released Home
 Temporarily disable the inverter 1 Home Assistant integration entry, or otherwise stop all polling of the master gateway channel, so the research session is its only Modbus client. Some TCP-to-RTU gateways can associate an RTU response with the wrong concurrent TCP request. From the repository root:
 
 ```powershell
-py .\tools\solark_tou_research.py snapshot 192.0.2.241 `
+py .\tools\solark_tou_research.py snapshot XXX.XXX.XXX.XXX `
   --start 0 --end 255 --chunk-size 8 --delay 2 --retries 3 `
   --output .\tou-before.json
 ```
@@ -39,7 +39,7 @@ Do not change operating mode, grid-interconnection settings, battery voltage, ba
 ## 3. Create and compare the second snapshot
 
 ```powershell
-py .\tools\solark_tou_research.py snapshot 192.0.2.241 `
+py .\tools\solark_tou_research.py snapshot XXX.XXX.XXX.XXX `
   --start 0 --end 255 --chunk-size 8 --delay 2 --retries 3 `
   --output .\tou-after.json
 
@@ -63,13 +63,55 @@ Example syntax only—these are deliberately placeholder values, not a known TOU
 
 ```powershell
 $env:SOLARK_UNSAFE_WRITE_ACK = "I_ACCEPT_THE_RISK"
-py .\tools\solark_tou_research.py write-single 192.0.2.241 `
+py .\tools\solark_tou_research.py write-single XXX.XXX.XXX.XXX `
   --address 999 --expected 123 --value 124 `
   --confirm "WRITE-MASTER-999-FROM-123-TO-124"
 Remove-Item Env:\SOLARK_UNSAFE_WRITE_ACK
 ```
 
 Immediately confirm the setting on both inverter screens. Restore the original value from the master screen unless the test plan explicitly requires retaining the new value.
+
+## Deye protocol cross-reference
+
+A Deye document titled *Modbus RTU Protocol*, revision V117 (2021-04-08), was reviewed as a research reference. The document is marked “All rights reserved,” so the complete PDF is not redistributed in this public repository. This section records only the relevant technical conclusions and our independent field-validation status.
+
+The document applies to microinverters, string inverters, and storage inverters. The Sol-Ark 15K appears to use common/string-inverter measurement registers together with the energy-storage variable region for battery, generator, and TOU functions. Applicability must be established register by register because Sol-Ark firmware can extend ranges or change behavior.
+
+The reference defines FC3 (0x03) for register reads and FC16 (0x10) for single- or multiple-register writes. This matches field testing: FC6 did not change TOU period 1, while FC16 quantity one succeeded and passed immediate FC3 read-back.
+
+### Candidate TOU register family
+
+| Function | Period 1 | Period 2 | Period 3 | Period 4 | Period 5 | Period 6 | Reference encoding |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Time | 250 | 251 | 252 | 253 | 254 | 255 | Decimal HHMM; field-confirmed |
+| Power | 256 | 257 | 258 | 259 | 260 | 261 | 1 W; candidate |
+| Battery voltage | 262 | 263 | 264 | 265 | 266 | 267 | 0.01 V; candidate |
+| Battery SOC | 268 | 269 | 270 | 271 | 272 | 273 | 1%; candidate |
+| Charge/mode flags | 274 | 275 | 276 | 277 | 278 | 279 | Bitfield; candidate |
+
+For registers 274–279, the reference identifies bit 0 as grid-charge enable and bit 1 as generator-charge enable. It also labels bits 2–4 as GM, BU, and CH modes, but those meanings remain unverified on Sol-Ark firmware. Register 248 appears to contain the overall TOU enable and Monday-through-Sunday enable bits; it must remain read-only until each active bit has been correlated with the master display.
+
+### Candidate generator and current settings
+
+| Address | Reference meaning | Reference scaling/range | Status |
+|---:|---|---|---|
+| 210 | Maximum battery charging current | 1 A; 0–185 A | Candidate; range likely model-specific |
+| 211 | Maximum battery discharge current | 1 A; 0–185 A | Candidate; range likely model-specific |
+| 223 | Maximum generator runtime | 0.1 hour | Candidate |
+| 224 | Generator cooling time | 0.1 hour | Candidate |
+| 225 | Generator charging start voltage | 0.01 V | Candidate |
+| 226 | Generator charging start SOC | 1% | Candidate |
+| 227 | Generator charging current to battery | 1 A; 0–185 A | Candidate for Generator Charge Current |
+| 230 | Utility charging current to battery | 1 A; 0–185 A | Candidate |
+| 292 | Generator peak-shaving power | 1 W; 0–16000 W | Candidate |
+
+The documented 8,000 W TOU-power ceiling and 185 A current ceilings must not be imposed on the Sol-Ark 15K without field confirmation. They appear to describe an older or smaller Deye platform and conflict with capabilities exposed by newer Sol-Ark firmware and parallel systems.
+
+### Evidence classification
+
+- **Confirmed:** addresses 250–255, decimal HHMM encoding, FC3 reads, FC16 quantity-one write at address 250, master display update, slave inheritance, persistence, and restoration.
+- **Strong candidates:** addresses 256–279 and generator setting address 227 because the table structure aligns with the Sol-Ark interface.
+- **Unverified:** Sol-Ark-specific ranges, registers 248 and 274–279 bit semantics, restart persistence for programmatic writes, and all remaining writable settings.
 
 ## Confirmed TOU time registers
 
