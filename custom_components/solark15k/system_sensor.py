@@ -167,28 +167,24 @@ async def async_setup_x2_sensors(
 ) -> None:
     """Create one x2 device when exactly two inverter entries are active."""
     domain_data = hass.data.setdefault(DOMAIN, {})
-    if domain_data.get(_X2_OWNER_KEY) is not None:
-        return
-
-    active_entries = [
-        candidate
-        for candidate in hass.config_entries.async_entries(DOMAIN)
-        if getattr(candidate, "runtime_data", None) is not None
-    ]
-    if len(active_entries) != 2:
-        return
-
-    coordinators = tuple(
-        candidate.runtime_data.coordinator for candidate in active_entries
-    )
-    domain_data[_X2_OWNER_KEY] = entry.entry_id
+    registrations = domain_data.setdefault("x2_sensor_registrations", {})
+    registrations[entry.entry_id] = entry.runtime_data.coordinator
 
     @callback
-    def clear_owner() -> None:
+    def clear_registration() -> None:
+        registrations.pop(entry.entry_id, None)
         if domain_data.get(_X2_OWNER_KEY) == entry.entry_id:
             domain_data.pop(_X2_OWNER_KEY, None)
 
-    entry.async_on_unload(clear_owner)
+    entry.async_on_unload(clear_registration)
+
+    if domain_data.get(_X2_OWNER_KEY) is not None:
+        return
+    if len(registrations) != 2:
+        return
+
+    coordinators = tuple(registrations.values())
+    domain_data[_X2_OWNER_KEY] = entry.entry_id
     async_add_entities(
         SolArkX2Sensor(coordinators, spec) for spec in _build_specs(descriptions)
     )
