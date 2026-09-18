@@ -15,7 +15,7 @@ Sol-Ark #2 splitter RS485 -> Waveshare CH2 -> IP B:502 -> HA entry Sol-Ark 15K #
 
 Each inverter remains on its own RS485 channel.
 
-Add the custom integration twice. Each entry uses its own TCP endpoint, while both retain Modbus slave ID `1`. With the recommended entry names, Home Assistant creates the production namespaces:
+Add the custom integration twice. Each entry uses its own TCP endpoint and the Modbus unit ID confirmed for that inverter. With the recommended entry names, Home Assistant creates the production namespaces:
 
 ```text
 sensor.sol_ark_15k_1_*
@@ -24,15 +24,29 @@ sensor.sol_ark_15k_2_*
 
 ## Slave addressing
 
-The public V1.4 map states that this protocol uses slave ID `0x01` and that the Parallel-screen Modbus SN does not change that slave ID.
+The public V1.4 map documents unit ID `0x01`, but field testing on a parallel Sol-Ark 15K pair demonstrated that the second inverter responded on unit ID `2`. Determine the unit ID by an FC3 read of register 183 rather than assuming both units use ID 1.
 
-Therefore both independently connected inverters use:
+Field-confirmed arrangement:
 
 ```text
-slave: 1
+Inverter 1 gateway endpoint -> unit ID 1
+Inverter 2 gateway endpoint -> unit ID 2
 ```
 
-They are distinguished by the separate Waveshare channel IP addresses.
+The separate Waveshare endpoints still provide electrical and troubleshooting isolation. The Home Assistant integration accepts a unit ID from 1 through 247 for each entry.
+
+### Parallel unit-ID field validation - 2026-09-18
+
+An FC3 request for register 183 to the second inverter timed out with unit ID 1. The same endpoint, wiring, splitter, serial configuration, and register returned successfully with unit ID 2:
+
+```text
+Request unit: 2
+Register: 183
+Raw response: 5461 (0x1555)
+Decoded battery voltage: 54.61 V
+```
+
+This confirms that unit ID can follow the inverter's parallel addressing on at least some Sol-Ark 15K firmware.
 
 ## Why not sum immediately
 

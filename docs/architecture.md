@@ -35,7 +35,7 @@ The project is intentionally **read-only** during initial development and field 
                       BMS                            BMS
 ```
 
-Each inverter gets its own isolated RS485 channel. This avoids placing two inverters on a shared serial bus and allows each Sol-Ark to be addressed using the fixed slave ID defined by the public V1.4 map.
+Each inverter gets its own isolated RS485 channel. This avoids placing two inverters on a shared serial bus and allows each Sol-Ark endpoint and unit ID to be validated independently.
 
 ## Data flow
 
@@ -118,16 +118,14 @@ Keeping raw values makes future reinterpretation possible if firmware behavior d
 
 ## Addressing model
 
-The public V1.4 protocol states that the slave ID for this map is fixed at `0x01` and that the Parallel-screen Modbus SN does not change this map's slave ID.
-
-Therefore, with independent channels:
+The public V1.4 protocol documents unit ID `0x01`, but field testing demonstrated that parallel addressing can affect the Modbus unit ID. The validated pair used:
 
 ```text
-Waveshare CH1 -> Sol-Ark #1 -> slave 1
-Waveshare CH2 -> Sol-Ark #2 -> slave 1
+Waveshare endpoint 1 -> Sol-Ark #1 -> unit ID 1
+Waveshare endpoint 2 -> Sol-Ark #2 -> unit ID 2
 ```
 
-The two devices are distinguished by separate TCP endpoints rather than separate Modbus slave IDs.
+The integration therefore stores both the TCP endpoint and unit ID per inverter. Register 183 should be tested on each endpoint before Home Assistant polling is enabled.
 
 ## Suggested network plan
 
