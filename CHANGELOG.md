@@ -4,6 +4,13 @@ All notable project changes will be documented here.
 
 Single-inverter monitoring and the field-validated two-inverter read path are stable. Built-in x2 aggregation is available when exactly two entries are active.
 
+## [0.3.1] - 2026-09-18
+
+### Fixed
+
+- Removed a startup race that could prevent the x2 device from being created when both inverter entries initialized concurrently.
+- Registered each inverter coordinator explicitly and created the x2 entities as soon as the second coordinator registered.
+
 ## [0.3.0] - 2026-09-18
 
 ### Added
