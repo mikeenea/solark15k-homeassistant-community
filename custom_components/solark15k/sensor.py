@@ -19,6 +19,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import SolArkConfigEntry
 from .const import DOMAIN
 from .coordinator import SolArkDataUpdateCoordinator
+from .system_sensor import async_setup_x2_sensors
 
 ValueFn = Callable[[dict[int, int]], int | float | None]
 
@@ -491,6 +492,12 @@ async def async_setup_entry(
     coordinator = entry.runtime_data.coordinator
     async_add_entities(
         SolArkSensor(coordinator, entry, description) for description in SENSORS
+    )
+    await async_setup_x2_sensors(
+        hass,
+        entry,
+        async_add_entities,
+        {description.key: description for description in SENSORS},
     )
 
 
