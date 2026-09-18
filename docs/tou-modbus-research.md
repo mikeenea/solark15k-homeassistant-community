@@ -50,7 +50,7 @@ Restore the setting from the master screen, take a third snapshot, and verify th
 
 ## Guarded single-register write
 
-Do not use `write-single` until an address and encoding have been confirmed through repeated screen-change comparisons. The command requires all of the following:
+Do not use `write-one-fc16` until an address and encoding have been confirmed through repeated screen-change comparisons. The command requires all of the following:
 
 1. the expected current raw value;
 2. the proposed raw value;
@@ -59,13 +59,13 @@ Do not use `write-single` until an address and encoding have been confirmed thro
 5. successful read-before-write comparison;
 6. successful immediate read-back.
 
-Example syntax only—these are deliberately placeholder values, not a known TOU register:
+Example syntax for the confirmed FC16 quantity-one path. The address and values are deliberately non-operational placeholders:
 
 ```powershell
 $env:SOLARK_UNSAFE_WRITE_ACK = "I_ACCEPT_THE_RISK"
-py .\tools\solark_tou_research.py write-single XXX.XXX.XXX.XXX `
+py .\tools\solark_tou_research.py write-one-fc16 XXX.XXX.XXX.XXX `
   --address 999 --expected 123 --value 124 `
-  --confirm "WRITE-MASTER-999-FROM-123-TO-124"
+  --confirm "WRITE-FC16-MASTER-999-FROM-123-TO-124"
 Remove-Item Env:\SOLARK_UNSAFE_WRITE_ACK
 ```
 
