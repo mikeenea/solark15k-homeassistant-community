@@ -109,7 +109,9 @@ This enables future analysis of load sharing, PV production differences, tempera
 
 ## Dashboard behavior
 
-The supplied Grafana dashboards expect `sol_ark_15k_1_*` and `sol_ark_15k_2_*` InfluxDB entity tags. Electrical Trends includes nine MPPT comparison charts that overlay inverter 1 and inverter 2. Parallel System Detail presents inverter 1, system, inverter 2, and delta columns. Inverter 2 series appear automatically after the second integration entry is exporting data.
+Export `sol_ark_15k_1_*`, `sol_ark_15k_2_*`, and `sol_ark_15k_x2_*` to InfluxDB. The Operational Console System view and Electrical Trends Whole-System Power panel use x2 entities directly. Electrical Trends retains inverter 1 and inverter 2 overlays for diagnostics, and Parallel System Detail presents system, inverter 1, inverter 2, and delta columns.
+
+The x2 series begins accumulating history only after the second integration entry is active and the x2 namespace is accepted by the Home Assistant InfluxDB filter. Existing individual-inverter history is not retroactively copied into x2 series.
 
 Energy Accounting provides a `System` selection. Validate that the energy entities represent the intended per-inverter quantities before relying on combined totals. Do not sum registers classified as duplicated system values.
 

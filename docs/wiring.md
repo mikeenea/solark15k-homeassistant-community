@@ -93,7 +93,7 @@ For a standard T568B patch cord, the usual colors are:
 
 **Always verify with a multimeter.** Do not rely solely on color.
 
-## Permanent dual-channel reference wiring
+## Dual-channel reference wiring
 
 The permanent **Waveshare 2-CH RS485 TO POE ETH (B)** should initially be wired label-to-label and validated independently:
 
@@ -117,7 +117,7 @@ Pin 3  GND ----------------------> GND
 
 Do not assume the temporary single-channel gateway's field-verified polarity behavior will be identical on the permanent two-channel device.
 
-## Temporary single-channel test wiring — field verified
+## Single-channel wiring — field verified
 
 For the **Waveshare RS232/485/422 TO POE ETH (B)** used during commissioning, label-to-label wiring timed out. Swapping only the two data conductors produced a valid Modbus response on 2026-09-10.
 

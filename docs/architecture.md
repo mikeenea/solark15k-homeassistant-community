@@ -15,8 +15,8 @@ The project is intentionally **read-only** during initial development and field 
                                |
                                v
                     +-----------------------+
-                    | Waveshare 2-CH        |
-                    | RS485 TO POE ETH (B)  |
+                    | Isolated gateway      |
+                    | endpoints 1 and 2     |
                     +-----------+-----------+
                                 |
                  +--------------+--------------+
@@ -68,7 +68,7 @@ The Sol-Ark public V1.4 document describes read operations for this map. This re
 
 ### 2. One serial channel per inverter
 
-A two-channel gateway is preferred to a multidrop RS485 bus for the initial system. Benefits include:
+A two-channel gateway or two single-channel gateways are preferred to a multidrop RS485 bus. Benefits include:
 
 - independent troubleshooting;
 - no shared-bus collisions between inverter interfaces;
@@ -132,8 +132,8 @@ The integration therefore stores both the TCP endpoint and unit ID per inverter.
 Example only:
 
 ```text
-Waveshare CH1: XXX.XXX.XXX.XXX:502
-Waveshare CH2: XXX.XXX.XXX.XXX:502
+Gateway endpoint 1: XXX.XXX.XXX.XXX:502
+Gateway endpoint 2: XXX.XXX.XXX.XXX:502
 Home Assistant: existing HA address
 ```
 
