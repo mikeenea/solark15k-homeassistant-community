@@ -4,6 +4,26 @@ All notable project changes will be documented here.
 
 Single-inverter monitoring and the field-validated two-inverter read path are stable. Built-in x2 aggregation is available when exactly two entries are active.
 
+## [0.9.0] - 2026-09-19
+
+### Added
+
+- Dependency-free regression tests for signed 16-bit decoding, battery power/current sign orientation, low-word-first 32-bit energy counters, x2 sums, arithmetic means, missing-source behavior, x2 creation rules, and InfluxDB line-protocol serialization.
+- A release-contract test covering HACS metadata, required package files, the four supported dashboards, version alignment, and the stable read-only boundary.
+- Canonical Home Assistant `strings.json` metadata alongside the English translation.
+- A clean-install and upgrade release-candidate checklist for one-inverter and two-inverter systems.
+- A field-tested support matrix covering topology, gateway arrangements, unit IDs, Home Assistant, InfluxDB, and Grafana.
+
+### Changed
+
+- Centralized register decoding and x2 aggregation calculations so the production entities and regression tests use the same implementation.
+- Centralized numeric InfluxDB line-protocol generation and made malformed, Boolean, non-numeric, and non-finite values fail closed.
+
+### Release boundary
+
+- `0.9.0` is the release candidate for the stable read-only `1.0.0` package.
+- Modbus writes and remote inverter configuration remain excluded from the stable branch.
+
 ## [0.4.0] - 2026-09-19
 
 ### Added
@@ -116,5 +136,6 @@ The repository and Home Assistant integration versions are aligned beginning wit
 0.2.2 -> stable single-inverter monitoring release
 0.3.0 -> parallel aggregation validated
 0.4.0 -> InfluxDB/Grafana baseline complete
+0.9.0 -> expanded tests and clean-install/upgrade release candidate
 1.0.0 -> stable read-only dual-Sol-Ark 15K release
 ```

@@ -12,6 +12,65 @@ class SolArkModbusError(Exception):
     """Base exception for Sol-Ark Modbus communication errors."""
 
 
+def build_read_holding_request(
+    transaction_id: int, slave_id: int, start: int, count: int
+) -> bytes:
+    """Build one Modbus TCP FC3 request with the configured RTU unit ID."""
+    if not 1 <= count <= 125:
+        raise ValueError("Modbus FC3 register count must be 1..125")
+    if not 1 <= slave_id <= 247:
+        raise ValueError("Modbus unit ID must be 1..247")
+    pdu = struct.pack(">BHH", FC_READ_HOLDING, start, count)
+    return struct.pack(">HHHB", transaction_id & 0xFFFF, 0, len(pdu) + 1, slave_id) + pdu
+
+
+def parse_read_holding_response(
+    mbap: bytes,
+    body: bytes,
+    expected_transaction_id: int,
+    expected_slave_id: int,
+    expected_count: int,
+) -> list[int]:
+    """Validate and decode one Modbus TCP FC3 response."""
+    if len(mbap) != 7:
+        raise SolArkModbusError(f"Unexpected MBAP length {len(mbap)}")
+    rx_tid, protocol, length, unit = struct.unpack(">HHHB", mbap)
+    if rx_tid != expected_transaction_id:
+        raise SolArkModbusError(
+            "Transaction ID mismatch: "
+            f"sent {expected_transaction_id}, received {rx_tid}"
+        )
+    if protocol != 0:
+        raise SolArkModbusError(f"Unexpected Modbus protocol ID {protocol}")
+    if unit != expected_slave_id:
+        raise SolArkModbusError(
+            f"Unit ID mismatch: expected {expected_slave_id}, received {unit}"
+        )
+    if length != len(body) + 1:
+        raise SolArkModbusError(
+            f"Unexpected Modbus length: header={length}, actual={len(body) + 1}"
+        )
+    if not body:
+        raise SolArkModbusError("Empty Modbus response")
+    function = body[0]
+    if function == (FC_READ_HOLDING | 0x80):
+        code = body[1] if len(body) > 1 else None
+        raise SolArkModbusError(f"Modbus exception response, code={code}")
+    if function != FC_READ_HOLDING:
+        raise SolArkModbusError(f"Unexpected function code {function}")
+    if len(body) < 2:
+        raise SolArkModbusError("Missing Modbus byte count")
+    byte_count = body[1]
+    payload = body[2:]
+    if byte_count != expected_count * 2 or len(payload) != byte_count:
+        raise SolArkModbusError(
+            "Unexpected byte count: "
+            f"expected {expected_count * 2}, header={byte_count}, "
+            f"actual={len(payload)}"
+        )
+    return list(struct.unpack(">" + "H" * expected_count, payload))
+
+
 class SolArkModbusClient:
     """Persistent Modbus TCP client for a TCP-to-RTU gateway.
 
@@ -78,16 +137,8 @@ class SolArkModbusClient:
                 assert self._writer is not None
 
                 self._transaction_id = (self._transaction_id + 1) & 0xFFFF
-                pdu = struct.pack(">BHH", FC_READ_HOLDING, start, count)
-                request = (
-                    struct.pack(
-                        ">HHHB",
-                        self._transaction_id,
-                        0,
-                        len(pdu) + 1,
-                        self.slave_id,
-                    )
-                    + pdu
+                request = build_read_holding_request(
+                    self._transaction_id, self.slave_id, start, count
                 )
 
                 self._writer.write(request)
@@ -95,46 +146,15 @@ class SolArkModbusClient:
 
                 async with asyncio.timeout(self.timeout):
                     mbap = await self._reader.readexactly(7)
-                    rx_tid, protocol, length, unit = struct.unpack(">HHHB", mbap)
+                    _, _, length, _ = struct.unpack(">HHHB", mbap)
                     body = await self._reader.readexactly(length - 1)
-
-                if rx_tid != self._transaction_id:
-                    raise SolArkModbusError(
-                        "Transaction ID mismatch: "
-                        f"sent {self._transaction_id}, received {rx_tid}"
-                    )
-                if protocol != 0:
-                    raise SolArkModbusError(
-                        f"Unexpected Modbus protocol ID {protocol}"
-                    )
-                if unit != self.slave_id:
-                    raise SolArkModbusError(
-                        f"Unit ID mismatch: expected {self.slave_id}, received {unit}"
-                    )
-                if not body:
-                    raise SolArkModbusError("Empty Modbus response")
-
-                function = body[0]
-                if function == (FC_READ_HOLDING | 0x80):
-                    code = body[1] if len(body) > 1 else None
-                    raise SolArkModbusError(
-                        f"Modbus exception response, code={code}"
-                    )
-                if function != FC_READ_HOLDING:
-                    raise SolArkModbusError(
-                        f"Unexpected function code {function}"
-                    )
-
-                byte_count = body[1]
-                payload = body[2:]
-                if byte_count != count * 2 or len(payload) != byte_count:
-                    raise SolArkModbusError(
-                        "Unexpected byte count: "
-                        f"expected {count * 2}, header={byte_count}, "
-                        f"actual={len(payload)}"
-                    )
-
-                return list(struct.unpack(">" + "H" * count, payload))
+                return parse_read_holding_response(
+                    mbap,
+                    body,
+                    self._transaction_id,
+                    self.slave_id,
+                    count,
+                )
 
             except (TimeoutError, asyncio.IncompleteReadError, OSError) as err:
                 await self.async_close()

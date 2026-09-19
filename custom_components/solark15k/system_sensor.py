@@ -18,6 +18,12 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN
+from .calculations import (
+    aggregate_x2,
+    should_create_x2,
+    signed_16,
+    x2_sources_available,
+)
 
 NumericValueFn = Callable[[dict[int, int]], int | float | None]
 
@@ -77,10 +83,6 @@ class X2SensorSpec:
     operation: str
 
 
-def _s16(raw: int) -> int:
-    return raw - 65536 if raw & 0x8000 else raw
-
-
 def _sum_unsigned(addresses: tuple[int, ...], scale: float) -> NumericValueFn:
     def value(data: dict[int, int]) -> int | float | None:
         if any(address not in data for address in addresses):
@@ -94,7 +96,7 @@ def _sum_signed(addresses: tuple[int, ...], scale: float) -> NumericValueFn:
     def value(data: dict[int, int]) -> int | float | None:
         if any(address not in data for address in addresses):
             return None
-        return sum(_s16(data[address]) for address in addresses) * scale
+        return sum(signed_16(data[address]) for address in addresses) * scale
 
     return value
 
@@ -178,9 +180,9 @@ async def async_setup_x2_sensors(
 
     entry.async_on_unload(clear_registration)
 
-    if domain_data.get(_X2_OWNER_KEY) is not None:
-        return
-    if len(registrations) != 2:
+    if not should_create_x2(
+        len(registrations), domain_data.get(_X2_OWNER_KEY) is not None
+    ):
         return
 
     coordinators = tuple(registrations.values())
@@ -223,8 +225,8 @@ class SolArkX2Sensor(SensorEntity):
     @property
     def available(self) -> bool:
         """Report available only when both inverter feeds are current."""
-        return all(
-            coordinator.last_update_success and coordinator.data is not None
+        return x2_sources_available(
+            (coordinator.last_update_success, coordinator.data)
             for coordinator in self.coordinators
         )
 
@@ -240,10 +242,4 @@ class SolArkX2Sensor(SensorEntity):
                 return None
             values.append(float(value))
 
-        result = sum(values)
-        if self.spec.operation == "mean":
-            result /= len(values)
-
-        if all(value.is_integer() for value in values) and result.is_integer():
-            return int(result)
-        return result
+        return aggregate_x2(values, self.spec.operation)

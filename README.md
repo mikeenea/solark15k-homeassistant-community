@@ -191,6 +191,13 @@ Do not begin by connecting both inverters.
 
 See [`docs/first-test.md`](docs/first-test.md).
 
+## Release qualification
+
+Version `0.9.0` is the release candidate for the stable read-only `1.0.0`
+package. See the [support matrix](docs/support-matrix.md) for the validated
+scope and the [release-candidate checklist](docs/release-candidate-checklist.md)
+for clean-install and upgrade acceptance checks.
+
 ## Repository layout
 
 ```text
