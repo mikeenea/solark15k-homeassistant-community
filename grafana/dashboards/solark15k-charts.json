@@ -99,7 +99,7 @@
   "timezone": "browser",
   "title": "Sol-Ark Modbus – Electrical Trends",
   "uid": "solark15k-charts",
-  "version": 21,
+  "version": 22,
   "panels": [
     {
       "id": 1,
@@ -204,7 +204,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id==\"${entity_prefix}1_load_total_power\" or r.entity_id==\"${entity_prefix}2_load_total_power\")\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> group(columns:[\"_time\"])\n  |> sum(column:\"_value\")\n  |> map(fn:(r)=>({r with entity_id:\"Load Power\",_field:\"value\"}))\n  |> group(columns:[\"entity_id\"])\n  |> sort(columns:[\"_time\"])",
+        "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id==\"${entity_prefix}x2_load_total_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with entity_id:\"Load Power\",_field:\"value\"}))\n  |> group(columns:[\"entity_id\"])\n  |> sort(columns:[\"_time\"])",
           "refId": "A"
         },
         {
@@ -212,7 +212,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id==\"${entity_prefix}1_pv_total_power\" or r.entity_id==\"${entity_prefix}2_pv_total_power\")\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> group(columns:[\"_time\"])\n  |> sum(column:\"_value\")\n  |> map(fn:(r)=>({r with entity_id:\"Solar PV\",_field:\"value\"}))\n  |> group(columns:[\"entity_id\"])\n  |> sort(columns:[\"_time\"])",
+        "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id==\"${entity_prefix}x2_pv_total_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with entity_id:\"Solar PV\",_field:\"value\"}))\n  |> group(columns:[\"entity_id\"])\n  |> sort(columns:[\"_time\"])",
           "refId": "B"
         },
         {
@@ -220,7 +220,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id==\"${entity_prefix}1_grid_total_power\" or r.entity_id==\"${entity_prefix}2_grid_total_power\")\n  |> map(fn:(r)=>({r with _value:float(v:r._value)}))\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> group(columns:[\"_time\"])\n  |> sum(column:\"_value\")\n  |> map(fn:(r)=>({r with entity_id:\"Grid Power\",_field:\"value\"}))\n  |> group(columns:[\"entity_id\"])\n  |> sort(columns:[\"_time\"])",
+        "query": "from(bucket:\"${bucket}\")\n  |> range(start:v.timeRangeStart,stop:v.timeRangeStop)\n  |> filter(fn:(r)=>r._field==\"value\")\n  |> filter(fn:(r)=>r.entity_id==\"${entity_prefix}x2_grid_total_power\")\n  |> aggregateWindow(every:v.windowPeriod,fn:last,createEmpty:false)\n  |> map(fn:(r)=>({r with entity_id:\"Grid Power\",_field:\"value\"}))\n  |> group(columns:[\"entity_id\"])\n  |> sort(columns:[\"_time\"])",
           "refId": "C"
         }
       ]
@@ -2777,5 +2777,5 @@
       ]
     }
   ],
-  "description": "Electrical trends with combined L1–L2 and total-power/current readings; individual 120 V leg traces are omitted."
+  "description": "Electrical trends with x2 whole-system power, inverter comparison overlays, and combined L1–L2 readings; individual 120 V leg traces are omitted."
 }
