@@ -105,7 +105,8 @@ Tracking issue: #1
 - [ ] Community validation reports
 - [x] Automated YAML/Python validation in CI
 - [x] Automated Grafana JSON, layout, variable, and Business Charts JavaScript validation
-- [ ] Register-map unit tests
+- [x] Register decoding and aggregation unit tests
+- [ ] Full register-map replay tests
 - [ ] Optional Modbus response replay tests
 - [x] Release/versioning policy
 - [x] Public single-inverter deployment guide
@@ -118,7 +119,7 @@ Tracking issue: #1
 
 - [x] `0.3.1`: automatic two-inverter x2 entities and startup-race correction
 - [x] `0.4.0`: field-tested documentation, x2 historian/dashboard baseline, and dashboard CI
-- [ ] `0.9.0`: expanded integration tests and clean-install/upgrade release candidate
+- [x] `0.9.0`: expanded integration tests and clean-install/upgrade release candidate
 - [ ] `1.0.0`: stable read-only one- and two-inverter release
 
 ## Explicitly out of scope for initial releases
