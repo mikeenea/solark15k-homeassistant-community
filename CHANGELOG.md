@@ -4,6 +4,26 @@ All notable project changes will be documented here.
 
 Single-inverter monitoring and the field-validated two-inverter read path are stable. Built-in x2 aggregation is available when exactly two entries are active.
 
+## [0.4.0] - 2026-09-19
+
+### Added
+
+- Automated validation for all four supported Grafana dashboard exports, including JSON parsing, unique panel IDs, grid-layout overlap detection, variable references, and Business Charts JavaScript syntax.
+- Public documentation for both supported parallel gateway arrangements: one dual-channel Waveshare or two independently addressed single-channel Waveshare gateways.
+- Required `sensor.sol_ark_15k_x2_*` InfluxDB export guidance throughout the primary deployment path.
+
+### Changed
+
+- Corrected remaining documentation that assumed both parallel inverters use Modbus unit ID 1. Unit ID must be tested per endpoint; the field-tested pair uses unit ID 1 for inverter 1 and unit ID 2 for inverter 2.
+- Updated the roadmap to reflect completed single-inverter, dual-inverter, x2, historian, dashboard, and release work.
+- Optimized the Operational Console System view and Electrical Trends Whole-System Power panel to use verified x2 series directly.
+
+### Release boundary
+
+- Monitoring remains strictly read-only.
+- TOU and other Modbus write research remain isolated from the stable release branch.
+- Advanced event analytics, automated register writes, and support for other inverter models remain outside the 0.4.0 scope.
+
 ## [0.3.1] - 2026-09-18
 
 ### Fixed

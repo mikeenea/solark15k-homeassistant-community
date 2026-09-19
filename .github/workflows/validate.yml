@@ -29,6 +29,9 @@ jobs:
           python -m py_compile tools/*.py
           python -m py_compile custom_components/solark15k/*.py
 
+      - name: Run dependency-free unit tests
+        run: python -m unittest discover -s tests -v
+
       - name: Validate JSON files
         shell: python
         run: |
@@ -40,6 +43,9 @@ jobs:
               with path.open("r", encoding="utf-8") as handle:
                   json.load(handle)
               print(f"OK: {path}")
+
+      - name: Validate supported Grafana dashboards
+        run: python tools/validate_grafana_dashboards.py
 
       - name: Parse YAML files
         shell: python

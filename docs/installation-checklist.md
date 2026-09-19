@@ -19,7 +19,7 @@ This checklist is intentionally installation-neutral. Use sections A-I for one i
 
 ## B. Hardware inventory
 
-- [ ] Waveshare 2-CH RS485 TO POE ETH (B).
+- [ ] One 2-CH Waveshare or one independently addressed single-channel Waveshare per inverter.
 - [ ] PoE switch/injector available.
 - [ ] Two passive RJ45 patch leads.
 - [ ] Multimeter.
@@ -149,8 +149,10 @@ Do not start until CH1 is validated.
 - [ ] Battery CAN side unchanged.
 - [ ] TCP 502 test passes.
 - [ ] Python probe passes.
+- [ ] Inverter #2 unit ID tested explicitly; do not assume it matches inverter #1.
 - [ ] Raw dump captured.
 - [ ] Core values validated.
+- [ ] `sensor.sol_ark_15k_x2_*` entities appear after both integration entries load.
 - [ ] 24-hour stability period passed.
 
 ## L. Parallel-system classification

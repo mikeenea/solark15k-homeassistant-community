@@ -31,7 +31,7 @@ Each inverter uses its own TCP endpoint. Confirm the Modbus unit ID independentl
 ## What this project provides
 
 - A native Home Assistant custom integration for read-only Sol-Ark 15K telemetry.
-- Waveshare 2-CH RS485 TO POE ETH (B) setup guidance.
+- Waveshare single-channel and 2-CH RS485-to-PoE-Ethernet setup guidance.
 - Reuse of the RS485 side of a Sol-Ark/SolarAssistant CAN/RS485 splitter where applicable.
 - A no-dependency Python Modbus TCP probe for commissioning.
 - A working register reference derived from the public Sol-Ark Modbus RTU Protocol V1.4.
@@ -67,7 +67,7 @@ Existing CAN/RS485 splitter
       |
       +---- CAN --------------------> Battery BMS
       |
-      +---- RS485 ------------------> Waveshare CH1
+      +---- RS485 ------------------> Isolated gateway endpoint 1
                                         |
                                         | Modbus TCP
                                         v
@@ -93,10 +93,10 @@ Existing CAN/RS485 splitter
       |
       +---- CAN --------------------> Battery BMS
       |
-      +---- RS485 ------------------> Waveshare CH2
+      +---- RS485 ------------------> Isolated gateway endpoint 2
 ```
 
-The two inverter RS485 links remain electrically independent. Each Waveshare channel is treated as a separate Modbus TCP gateway.
+The two inverter RS485 links remain electrically independent. The endpoints may be two channels of one Waveshare or two separately addressed single-channel Waveshare gateways.
 
 InfluxDB may run on a dedicated Linux host, VM, Docker host, supported NAS, or the Home Assistant host. Choose a location with persistent storage, backups, stable networking, and enough resources for the desired retention period. Grafana may run on the same host or elsewhere.
 
@@ -110,13 +110,13 @@ The project currently uses the public **Sol-Ark Modbus RTU Protocol V1.4** as it
 - 8 data bits;
 - no parity;
 - 1 stop bit;
-- fixed slave ID `0x01` for this map;
+- documented default slave ID `0x01` for this map;
 - signal ground connected between inverter and master;
 - 120-ohm termination at the master side;
 - CAN-based battery communications can coexist with this read protocol when the inverter is configured appropriately;
 - RS485-based battery communications cannot be used simultaneously with this protocol.
 
-The Parallel-screen **Modbus SN is not the slave ID for this map**. Each independently connected inverter is polled as slave ID 1.
+The public map documents unit ID `1`, but the unit ID must be tested on each endpoint. Field testing found unit ID `1` on inverter 1 and unit ID `2` on inverter 2. The integration supports unit IDs 1 through 247.
 
 ## Important safety and support notice
 
@@ -128,13 +128,15 @@ Do not add register writes unless the applicable Sol-Ark documentation explicitl
 
 ## Hardware
 
-### Recommended gateway — Waveshare 2-CH RS485 TO POE ETH (B)
+### Supported gateway arrangements
 
 [![Waveshare 2-CH RS485 TO POE ETH (B)](https://www.waveshare.com/wiki/Special:Redirect/file/2-CH%20RS485%20TO%20ETH%20%28B%29.jpg)](https://www.waveshare.com/product/iot-communication/wired-comm-converter/2-ch-rs485-to-eth-b.htm)
 
 > **Use the PoE model:** select **2-CH RS485 TO POE ETH (B)**, not the non-PoE **2-CH RS485 TO ETH (B)** variant.
 
-Why this gateway fits the project:
+The Waveshare 2-CH RS485 TO POE ETH (B) is a convenient one-appliance option. Two Waveshare RS232/485/422 TO POE ETH (B) gateways are also supported and field-tested. Both arrangements provide one isolated TCP-to-RS485 path per inverter.
+
+Why the two-channel option fits the project:
 
 - two isolated RS485 channels that can operate independently;
 - PoE-powered Ethernet on the PoE variant, IEEE 802.3af compliant;
@@ -150,6 +152,13 @@ Waveshare CH1 -> Sol-Ark #1 RS485
 Waveshare CH2 -> Sol-Ark #2 RS485
 ```
 
+Equivalent two-gateway arrangement:
+
+```text
+Single-channel gateway A -> Sol-Ark #1 RS485
+Single-channel gateway B -> Sol-Ark #2 RS485
+```
+
 Official Waveshare sources:
 
 - [Waveshare product page — 2-CH RS485 TO ETH (B) / 2-CH RS485 TO POE ETH (B)](https://www.waveshare.com/product/iot-communication/wired-comm-converter/2-ch-rs485-to-eth-b.htm)
@@ -158,9 +167,9 @@ Official Waveshare sources:
 
 The official Waveshare page covers both the standard Ethernet and PoE variants. This project specifically targets the **PoE** version.
 
-### Temporary single-inverter test gateway
+### Single-channel gateway
 
-A **Waveshare RS232/485/422 TO POE ETH (B)** may be used to validate one Sol-Ark at a time during commissioning. In RS485 mode, the project's test wiring uses Waveshare's documented `TA` (RS485 A), `TB` (RS485 B), and signal-ground terminal. See [`docs/waveshare-setup.md`](docs/waveshare-setup.md) for the exact test wiring and the official Waveshare source link.
+A **Waveshare RS232/485/422 TO POE ETH (B)** may be used for one inverter or paired with a second independently addressed unit for simultaneous two-inverter monitoring. In RS485 mode, the project's test wiring uses Waveshare's documented `TA` (RS485 A), `TB` (RS485 B), and signal-ground terminal. See [`docs/waveshare-setup.md`](docs/waveshare-setup.md) for the exact test wiring and the official Waveshare source link.
 
 See [`docs/hardware.md`](docs/hardware.md), [`docs/wiring.md`](docs/wiring.md), and [`docs/waveshare-setup.md`](docs/waveshare-setup.md).
 

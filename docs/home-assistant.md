@@ -2,7 +2,7 @@
 
 ## Goal
 
-Home Assistant communicates directly with each Sol-Ark 15K through the Waveshare Modbus TCP gateway. No SolarAssistant, MQTT bridge, or custom HACS integration is required for the primary data path.
+Home Assistant communicates directly with each Sol-Ark 15K through the Waveshare Modbus TCP gateway. The production path uses this repository's HACS-compatible custom integration; SolarAssistant and an MQTT bridge are not required. The native YAML examples in this document remain useful for commissioning and protocol inspection.
 
 ## Connection model
 

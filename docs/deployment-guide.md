@@ -173,9 +173,10 @@ The supplied Grafana dashboards expect the standard Home Assistant InfluxDB sche
        entity_globs:
          - sensor.sol_ark_15k_1_*
          - sensor.sol_ark_15k_2_*
+         - sensor.sol_ark_15k_x2_*
    ```
 
-   For one inverter, the inverter 2 glob may be omitted.
+   For one inverter, the inverter 2 and x2 globs may be omitted. The x2 namespace begins accumulating history only after two entries are active and the x2 glob is loaded by Home Assistant's InfluxDB integration.
 
 5. Confirm recent points exist before importing dashboards.
 6. Never commit tokens, passwords, internal certificates, or production database exports.
