@@ -35,7 +35,7 @@ Project colors are assigned consistently:
 
 The dashboards require Grafana, InfluxDB, and—where identified—the Volkov Labs Business Charts plugin using Apache ECharts. Those projects retain their own names, trademarks, code, and licenses. This repository stores original dashboard configuration and does not vendor their software.
 
-SolarAssistant is credited only where its published technical documentation materially informed hardware wiring or data-migration procedures. That credit does not imply that these dashboards are SolarAssistant dashboards, derivatives, replacements endorsed by SolarAssistant, or compatible with every SolarAssistant installation.
+SolarAssistant is credited only where its published technical documentation materially informed hardware wiring. That credit does not imply that these dashboards are SolarAssistant dashboards, derivatives, replacements endorsed by SolarAssistant, or compatible with every SolarAssistant installation.
 
 ## Publication rules
 
