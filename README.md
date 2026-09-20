@@ -4,7 +4,7 @@ A local, read-only Home Assistant integration for one Sol-Ark 15K inverter or tw
 
 This project provides independent, local access to inverter telemetry through documented Sol-Ark Modbus interfaces, Home Assistant, InfluxDB, and Grafana. A standalone installation uses one isolated RS485 endpoint. A parallel installation uses two isolated endpoints, one per inverter.
 
-> **Project status:** stable read-only monitoring for one inverter and field-validated monitoring for two parallel inverters, including automatic x2 system entities.
+> **Project status:** version `1.0.0` provides stable, field-validated, read-only monitoring for one inverter or two parallel inverters, including automatic x2 system entities.
 
 ## Start here
 
@@ -191,12 +191,9 @@ Do not begin by connecting both inverters.
 
 See [`docs/first-test.md`](docs/first-test.md).
 
-## Release qualification
+## Stable release
 
-Version `0.9.0` is the release candidate for the stable read-only `1.0.0`
-package. See the [support matrix](docs/support-matrix.md) for the validated
-scope and the [release-candidate checklist](docs/release-candidate-checklist.md)
-for clean-install and upgrade acceptance checks.
+Version `1.0.0` is the stable read-only release for one Sol-Ark 15K inverter or two Sol-Ark 15K inverters operating in parallel. See the [support matrix](docs/support-matrix.md) for the validated scope and the [release acceptance checklist](docs/release-candidate-checklist.md) for clean-install and upgrade checks.
 
 ## Repository layout
 
@@ -263,17 +260,10 @@ The supplied Docker example is pinned to `influxdb:2.8.0`. Do not use a generic 
 
 See the platform-neutral [`docs/influxdb.md`](docs/influxdb.md), the optional tested [`docs/nas-influxdb.md`](docs/nas-influxdb.md) UGREEN example, and [`docs/grafana.md`](docs/grafana.md).
 
-## Current field-validation priorities
+## Validated release scope
 
-Before the project is considered production-ready, validate these against live 15K data:
+The 1.0.0 release has been field validated for battery power/current sign conventions, battery-temperature handling, parallel inverter power measurements, per-inverter versus combined system values, low-word-first lifetime energy counters, x2 aggregation, InfluxDB ingestion, and the four supported Grafana dashboards. Firmware behavior may differ; report new firmware combinations and real fault events using the contribution guidance below.
 
-- battery power sign convention;
-- battery current sign convention;
-- battery temperature encoding on current firmware;
-- grid/load/battery values in a parallel two-inverter system;
-- which measurements are per-inverter versus already system-wide;
-- long-term energy counter word ordering;
-- fault-word behavior during real events.
 
 ## Credits and source attribution
 

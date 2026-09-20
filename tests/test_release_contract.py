@@ -17,7 +17,7 @@ class ReleaseContractTests(unittest.TestCase):
             (ROOT / "custom_components/solark15k/manifest.json").read_text()
         )
         self.assertEqual(manifest["domain"], "solark15k")
-        self.assertEqual(manifest["version"], "0.9.0")
+        self.assertEqual(manifest["version"], "1.0.0")
         self.assertTrue(manifest["config_flow"])
         self.assertEqual(manifest["iot_class"], "local_polling")
         self.assertTrue(manifest["documentation"].startswith("https://github.com/"))

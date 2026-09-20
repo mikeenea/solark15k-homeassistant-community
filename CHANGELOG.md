@@ -4,6 +4,33 @@ All notable project changes will be documented here.
 
 Single-inverter monitoring and the field-validated two-inverter read path are stable. Built-in x2 aggregation is available when exactly two entries are active.
 
+## [1.0.0] - 2026-09-20
+
+### Added
+
+- Stable read-only monitoring support for one Sol-Ark 15K inverter or two Sol-Ark 15K inverters operating in parallel.
+- Automatic x2 system entities for validated combined power, current, energy, voltage, frequency, and state-of-charge measurements.
+- Four supported Grafana dashboards: Operational Console, Electrical Trends, Energy Accounting, and Parallel System Detail.
+- Public installation, Waveshare commissioning, Home Assistant, InfluxDB, Grafana, troubleshooting, and single-/dual-inverter deployment documentation.
+
+### Validated
+
+- Field operation with one inverter and with two parallel inverters using isolated Waveshare Modbus TCP-to-RTU endpoints.
+- Configurable Modbus unit IDs, including the field-tested inverter 1 / unit 1 and inverter 2 / unit 2 arrangement.
+- Signed battery power/current handling, 32-bit energy counters, x2 aggregation rules, InfluxDB ingestion, HACS installation, and dashboard imports.
+- Automated compilation, unit, metadata, release-boundary, documentation-link, register-map, YAML/JSON, and Grafana-dashboard checks.
+
+### Changed
+
+- Promoted the 0.9.0 release candidate to the stable 1.0.0 release.
+- Finalized whole-system power, grid-status, disconnected-grid, and steady-frequency dashboard behavior.
+- Updated public documentation to distinguish the validated 1.0.0 scope from future enhancements.
+
+### Safety boundary
+
+- The stable integration remains strictly read-only and contains no Modbus write implementation.
+- Experimental TOU research remains isolated from the stable branch and is not included in this release.
+
 ## [0.9.0] - 2026-09-19
 
 ### Added

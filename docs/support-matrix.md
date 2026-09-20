@@ -1,7 +1,6 @@
 # Support matrix
 
-Version `0.9.0` is a release candidate for the field-tested read-only Sol-Ark
-15K path. Items listed as optional do not affect Home Assistant monitoring.
+Version `1.0.0` is the stable, field-tested, read-only Sol-Ark 15K release. Items listed as optional do not affect Home Assistant monitoring.
 
 | Component | Supported/validated scope |
 |---|---|
