@@ -555,7 +555,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket: \"${bucket}\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> filter(fn: (r) => r.entity_id =~ /^${entity_prefix}(${inverter:raw})_grid_total_power$/)\n  |> group(columns: [\"entity_id\"])\n  |> last()\n  |> group()\n  |> sum(column: \"_value\")",
+        "query": "from(bucket: \"${bucket}\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> filter(fn: (r) =>\n    if \"${inverter:raw}\" == \"x2\" then\n      r.entity_id =~ /^${entity_prefix}(1|2)_grid_total_power$/\n    else\n      r.entity_id == \"${entity_prefix}${inverter}_grid_total_power\"\n  )\n  |> group(columns: [\"entity_id\"])\n  |> last()\n  |> group()\n  |> sum(column: \"_value\")",
           "refId": "A"
         }
       ],
