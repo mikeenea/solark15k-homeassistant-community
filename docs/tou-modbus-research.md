@@ -4,6 +4,12 @@
 
 This work is isolated on the `dev/tou-modbus-research` branch. The released Home Assistant integration remains read-only.
 
+## Writable-control inventory
+
+The user-supplied SolarAssistant entity screenshots have been translated into an independent Sol-Ark/Deye register-candidate and Home Assistant control matrix in [writable-controls-inventory.md](writable-controls-inventory.md). The screenshots are treated only as evidence that the control concepts exist; they are not evidence of register addresses and no SolarAssistant code, MQTT topics, or assets are used.
+
+The inventory records confirmed, strong-candidate, candidate, unresolved, and blocked fields. It also defines a phased master-only implementation: the master receives every experimental write and the slave is expected to inherit applicable settings through the parallel communications channel.
+
 ## Research assumptions
 
 - The master inverter is the configuration authority.
