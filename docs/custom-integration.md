@@ -86,14 +86,16 @@ Search for:
 Sol-Ark 15K Modbus
 ```
 
-For one inverter, add one integration entry using the gateway endpoint assigned to that inverter, TCP port `502`, and Modbus slave ID `1`.
+For one inverter, add one integration entry using the gateway endpoint assigned to that inverter, TCP port `502`, and the unit ID confirmed by the register-183 test. The default is `1`.
 
-For two parallel inverters, add the integration twice. Use a different gateway endpoint and name for each entry, but retain slave ID `1` for both:
+For two parallel inverters, add the integration twice. Use a different gateway endpoint, name, and field-confirmed unit ID for each entry:
 
 ```text
-Sol-Ark 15K #1 -> inverter 1 gateway endpoint -> slave 1
-Sol-Ark 15K #2 -> inverter 2 gateway endpoint -> slave 1
+Sol-Ark 15K #1 -> inverter 1 gateway endpoint -> unit ID 1
+Sol-Ark 15K #2 -> inverter 2 gateway endpoint -> unit ID 2
 ```
+
+The integration accepts unit IDs 1 through 247 and includes the unit ID in the entry's unique identifier.
 
 Each entry creates its own Home Assistant device. With the recommended names, the normal entity namespaces are:
 

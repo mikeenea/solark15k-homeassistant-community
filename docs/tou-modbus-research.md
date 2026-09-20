@@ -205,3 +205,18 @@ Work is intentionally paused with normal Home Assistant monitoring re-enabled an
 9. Do not attempt another write until the candidate address, encoding, range, and screen-based restoration have been independently confirmed.
 
 Local `tou-*.json` snapshots are research evidence and may contain private endpoint metadata. They are intentionally not committed. Preserve them locally if desired, but create a fresh baseline when work resumes.
+
+## Field validation and development implementation — 2026-09-20
+
+Four additional master settings were isolated with before, after, and restored snapshots. The slave inherited each saved master-screen change. Every restoration comparison returned no changed registers in the common snapshot range.
+
+| Control | Address/field | Observed transition | Result |
+|---|---:|---:|---|
+| TOU Power Point 1 | 256 | 12000 to 11900 | Confirmed, direct watts |
+| TOU Capacity Point 1 | 268 | 50 to 49 | Confirmed, direct percent |
+| TOU Charge Point 1 | 274 bit 0 | 1 to 0 | Confirmed packed flag |
+| Global Generator Charge | 231 | 1 to 0 | Confirmed Boolean |
+
+The Sol-Ark presents one charge enable for each TOU period; it does not present separate grid and generator switches per period. Register 274 bit 0 is therefore identified as **TOU Charge Point 1**, not Grid Charge Point 1. Register 274 bit 1 remains unknown and blocked. Generator charging is enabled globally through register 231.
+
+Development preview `1.1.0b1` exposes these four controls only on the unit-ID-1 master entry. Numeric controls use Home Assistant box mode. Writes use FC16 quantity one, read-before-write comparison, immediate FC3 read-back, coordinator publication only after verification, and read-modify-write for the packed charge flag. No writable controls are created on inverter 2 or the x2 device.

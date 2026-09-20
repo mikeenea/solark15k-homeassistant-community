@@ -1,7 +1,12 @@
 """Constants for the Sol-Ark 15K Modbus integration."""
 
 DOMAIN = "solark15k"
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "number", "switch"]
+
+# Development-only writable controls are exposed only for the master inverter.
+# Sol-Ark standalone and parallel master configurations use unit ID 1; the
+# parallel communications link distributes master settings to the slave.
+MASTER_SLAVE_ID = 1
 
 CONF_SLAVE_ID = "slave_id"
 CONF_INTER_REQUEST_DELAY = "inter_request_delay"

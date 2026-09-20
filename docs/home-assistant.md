@@ -2,7 +2,7 @@
 
 ## Goal
 
-Home Assistant communicates directly with each Sol-Ark 15K through the Waveshare Modbus TCP gateway. No SolarAssistant, MQTT bridge, or custom HACS integration is required for the primary data path.
+Home Assistant communicates directly with each Sol-Ark 15K through the Waveshare Modbus TCP gateway. The production path uses this repository's HACS-compatible custom integration; SolarAssistant and an MQTT bridge are not required. The native YAML examples in this document remain useful for commissioning and protocol inspection.
 
 ## Connection model
 
@@ -10,10 +10,10 @@ For the reference two-inverter installation:
 
 ```text
 solark_1 -> Waveshare CH1 IP:502 -> slave 1
-solark_2 -> Waveshare CH2 IP:502 -> slave 1
+solark_2 -> Waveshare CH2 IP:502 -> slave 2
 ```
 
-Each Waveshare channel is a separate TCP endpoint. The public Sol-Ark V1.4 map states that slave ID 1 is fixed for this protocol.
+Each Waveshare channel is a separate TCP endpoint. Unit ID is configured per endpoint; field testing confirmed unit 1 for inverter 1 and unit 2 for inverter 2.
 
 ## Recommended package approach
 
@@ -34,7 +34,7 @@ If a `homeassistant:` section already exists, merge the `packages:` line into it
 modbus:
   - name: solark_test
     type: tcp
-    host: 192.0.2.241
+    host: XXX.XXX.XXX.XXX
     port: 502
     timeout: 5
     delay: 1

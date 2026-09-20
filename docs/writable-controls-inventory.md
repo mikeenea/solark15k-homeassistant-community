@@ -33,10 +33,13 @@ For a parallel system:
 | SolarAssistant control | Candidate register(s) | Encoding | Status | Proposed Home Assistant control |
 |---|---:|---|---|---|
 | Time point 1-6 | 250-255 | Decimal HHMM | **Confirmed** | Six `time` entities |
-| Power point 1-6 | 256-261 | 1 W | Strong candidate; Sol-Ark range must be confirmed | Six bounded `number` entities |
-| Capacity point 1-6 | 268-273 | 1% SOC | Strong candidate | Six `number` entities, 0-100% |
-| Grid charge point 1-6 | 274-279 bit 0 | Packed Boolean flag | Strong candidate; bit-preserving write required | Six `switch` entities |
-| Gen charge point 1-6 | 274-279 bit 1 | Packed Boolean flag | Strong candidate; bit-preserving write required | Six `switch` entities |
+| Power point 1 | 256 | 1 W | **Confirmed** at 12000 and 11900 W, including restoration | Box-mode `number` entity |
+| Power points 2-6 | 257-261 | 1 W | Strong candidate; not yet field-confirmed | None until individually confirmed |
+| Capacity point 1 | 268 | 1% SOC | **Confirmed** at 50% and 49%, including restoration | Box-mode `number` entity, 0-100% |
+| Capacity points 2-6 | 269-273 | 1% SOC | Strong candidate; not yet field-confirmed | None until individually confirmed |
+| Charge point 1 | 274 bit 0 | Packed Boolean flag | **Confirmed**, including bit-preserving interpretation and restoration | `switch` entity |
+| Charge points 2-6 | 275-279 bit 0 | Packed Boolean flag | Strong candidate; not yet field-confirmed | None until individually confirmed |
+| Register 274 bit 1 and equivalent bits | 274-279 bit 1 | Unknown | **Blocked**; Sol-Ark has one charge-point control and separate global source controls | None |
 | Additional period mode bits | 274-279 bits 2-4 | GM/BU/CH labels are not sufficiently defined | Blocked | None until semantics are proven |
 | Overall TOU/day enable | 248 | Packed enable/day bitfield | Candidate and high-impact | Disabled-by-default switches only after validation |
 
@@ -60,7 +63,7 @@ For a parallel system:
 |---|---:|---|---|---|
 | Force generator on | 234 | Boolean; depends on auxiliary-port mode | Candidate and operationally high-impact | Momentary action or guarded switch after validation |
 | Auxiliary port | 235 | 0=generator input, 1=smart load, 2=microinverter input in Deye reference | Strong candidate; Sol-Ark enumeration must be confirmed | Guarded `select` |
-| Generator charge enabled | 231 | Boolean | Strong candidate | `switch` after validation |
+| Generator charge enabled | 231 | Boolean | **Confirmed**, including slave inheritance and restoration | `switch` entity |
 | Generator connected to grid input | 291 | Boolean | Strong candidate | Guarded `switch` |
 | Generator peak shaving enabled | 280 bits 4-7 | Packed field | Strong candidate; must preserve unrelated bits | Guarded `switch` |
 | Generator peak shaving power | 292 | 1 W | Strong candidate; Deye range 0-16000 W | Bounded `number` |
@@ -105,7 +108,7 @@ For a parallel system:
 
 ### Phase W1 - confirmed schedule foundation
 
-Implement development-only, master-only read entities for registers 248 and 250-279. Make only registers 250-255 writable initially. Each write must:
+Implement development-only, master-only controls only for fields confirmed through field testing. Each write must:
 
 1. verify the expected current value;
 2. validate HHMM input;
@@ -117,11 +120,11 @@ Implement development-only, master-only read entities for registers 248 and 250-
 
 ### Phase W2 - TOU power and SOC
 
-Use screen-change snapshots to confirm registers 256-261 and 268-273, scaling, increments, and Sol-Ark-specific limits. After confirmation, expose six power and six SOC inputs.
+Point 1 at registers 256 and 268 is confirmed and exposed. Confirm points 2-6 independently before exposing the remaining inputs.
 
 ### Phase W3 - packed charge flags
 
-Map registers 274-279 one bit at a time. Writes must use read-modify-write and preserve every unrelated bit. Expose grid-charge and generator-charge switches only after both bit positions are confirmed on the master and inherited by the slave.
+Register 274 bit 0 is confirmed as the single TOU Charge Point 1 control. Writes must use read-modify-write and preserve every unrelated bit. Do not represent bit 1 as a generator-charge point; global generator charging is independently controlled by register 231.
 
 ### Phase W4 - generator controls
 

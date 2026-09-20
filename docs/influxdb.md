@@ -89,6 +89,7 @@ influxdb:
       - binary_sensor.sol_ark_test_*
       - sensor.sol_ark_15k_1_*
       - sensor.sol_ark_15k_2_*
+      - sensor.sol_ark_15k_x2_*
 ```
 
 Do **not** add JK, SOK, iBMS, YamBMS, or general Home Assistant globs to this project database.

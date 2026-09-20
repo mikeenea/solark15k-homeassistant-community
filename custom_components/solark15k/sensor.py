@@ -17,8 +17,10 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import SolArkConfigEntry
+from .calculations import signed_16, unsigned_32
 from .const import DOMAIN
 from .coordinator import SolArkDataUpdateCoordinator
+from .system_sensor import async_setup_x2_sensors
 
 ValueFn = Callable[[dict[int, int]], int | float | None]
 
@@ -34,15 +36,11 @@ def _u(address: int, scale: float = 1.0, offset: float = 0.0) -> ValueFn:
     return value
 
 
-def _s16_raw(raw: int) -> int:
-    return raw - 65536 if raw & 0x8000 else raw
-
-
 def _s(address: int, scale: float = 1.0) -> ValueFn:
     def value(data: dict[int, int]) -> int | float | None:
         if address not in data:
             return None
-        result = _s16_raw(data[address]) * scale
+        result = signed_16(data[address]) * scale
         return int(result) if scale == 1.0 else result
 
     return value
@@ -52,7 +50,7 @@ def _u32(low: int, high: int, scale: float = 1.0) -> ValueFn:
     def value(data: dict[int, int]) -> int | float | None:
         if low not in data or high not in data:
             return None
-        result = ((data[high] << 16) | data[low]) * scale
+        result = unsigned_32(data[low], data[high]) * scale
         return int(result) if scale == 1.0 else result
 
     return value
@@ -71,7 +69,7 @@ def _positive_signed(address: int) -> ValueFn:
     def value(data: dict[int, int]) -> int | None:
         if address not in data:
             return None
-        return max(_s16_raw(data[address]), 0)
+        return max(signed_16(data[address]), 0)
 
     return value
 
@@ -80,7 +78,7 @@ def _negative_signed(address: int) -> ValueFn:
     def value(data: dict[int, int]) -> int | None:
         if address not in data:
             return None
-        return max(-_s16_raw(data[address]), 0)
+        return max(-signed_16(data[address]), 0)
 
     return value
 
@@ -491,6 +489,12 @@ async def async_setup_entry(
     coordinator = entry.runtime_data.coordinator
     async_add_entities(
         SolArkSensor(coordinator, entry, description) for description in SENSORS
+    )
+    await async_setup_x2_sensors(
+        hass,
+        entry,
+        async_add_entities,
+        {description.key: description for description in SENSORS},
     )
 
 

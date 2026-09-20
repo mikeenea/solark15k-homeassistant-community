@@ -16,9 +16,9 @@ class PollGroup:
     priority: int
 
 
-def build_poll_groups(live_interval: float, fault_interval: float, detail_interval: float, energy_interval: float) -> tuple[PollGroup, ...]:
+def build_poll_groups(live_interval: float, fault_interval: float, detail_interval: float, energy_interval: float, *, include_settings: bool = False) -> tuple[PollGroup, ...]:
     """Return the tiered register schedule."""
-    return (
+    groups = (
         PollGroup("live", 166, 31, live_interval, 0),
         PollGroup("faults", 103, 4, fault_interval, 1),
         PollGroup("pv_detail", 107, 8, detail_interval, 2),
@@ -26,4 +26,10 @@ def build_poll_groups(live_interval: float, fault_interval: float, detail_interv
         PollGroup("energy_60_75", 60, 16, energy_interval, 3),
         PollGroup("energy_76_91", 76, 16, energy_interval, 3),
         PollGroup("energy_92_102", 92, 11, energy_interval, 3),
+    )
+    if not include_settings:
+        return groups
+    return groups + (
+        PollGroup("settings_generator", 231, 1, detail_interval, 4),
+        PollGroup("settings_tou_1", 256, 19, detail_interval, 4),
     )

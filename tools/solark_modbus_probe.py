@@ -4,13 +4,13 @@
 No third-party modules are required.
 
 Usage:
-    python solark_modbus_probe.py 192.0.2.20
-    python solark_modbus_probe.py 192.0.2.20 --port 502 --dump
-    python solark_modbus_probe.py 192.0.2.20 --chunk-size 8 --retries 2 --delay 10
+    python solark_modbus_probe.py XXX.XXX.XXX.XXX
+    python solark_modbus_probe.py XXX.XXX.XXX.XXX --port 502 --unit-id 2 --dump
+    python solark_modbus_probe.py XXX.XXX.XXX.XXX --chunk-size 8 --retries 2 --delay 10
 
 Protocol basis: public Sol-Ark Modbus RTU Protocol V1.4
 - Gateway transport: Modbus TCP -> Modbus RTU
-- Unit/slave ID: 1
+- Unit/slave ID: configurable; default 1
 - Function: 3 (Read Holding Registers)
 
 This utility contains no Modbus write functions.
@@ -33,7 +33,7 @@ import struct
 import sys
 import time
 
-UNIT_ID = 1
+DEFAULT_UNIT_ID = 1
 FC_READ_HOLDING = 3
 
 
@@ -48,10 +48,17 @@ def read_exact(sock: socket.socket, count: int) -> bytes:
 
 
 class ModbusTCP:
-    def __init__(self, host: str, port: int = 502, timeout: float = 5.0) -> None:
+    def __init__(
+        self,
+        host: str,
+        port: int = 502,
+        timeout: float = 5.0,
+        unit_id: int = DEFAULT_UNIT_ID,
+    ) -> None:
         self.host = host
         self.port = port
         self.timeout = timeout
+        self.unit_id = unit_id
         self.transaction_id = 0
         self.sock: socket.socket | None = None
 
@@ -76,7 +83,7 @@ class ModbusTCP:
         self.transaction_id = (self.transaction_id + 1) & 0xFFFF
         pdu = struct.pack(">BHH", FC_READ_HOLDING, start, count)
         request = (
-            struct.pack(">HHHB", self.transaction_id, 0, len(pdu) + 1, UNIT_ID)
+            struct.pack(">HHHB", self.transaction_id, 0, len(pdu) + 1, self.unit_id)
             + pdu
         )
 
@@ -101,9 +108,9 @@ class ModbusTCP:
         if protocol != 0:
             self.close()
             raise RuntimeError(f"Unexpected Modbus protocol ID {protocol}")
-        if unit != UNIT_ID:
+        if unit != self.unit_id:
             self.close()
-            raise RuntimeError(f"Unit ID mismatch: expected {UNIT_ID}, received {unit}")
+            raise RuntimeError(f"Unit ID mismatch: expected {self.unit_id}, received {unit}")
         if not body:
             self.close()
             raise RuntimeError("Empty Modbus response")
@@ -203,6 +210,12 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=502)
     parser.add_argument("--timeout", type=float, default=5.0)
     parser.add_argument(
+        "--unit-id",
+        type=int,
+        default=DEFAULT_UNIT_ID,
+        help="Modbus unit/slave ID, 1..247 (default: 1)",
+    )
+    parser.add_argument(
         "--chunk-size",
         type=int,
         default=8,
@@ -225,6 +238,8 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if not 1 <= args.unit_id <= 247:
+        parser.error("--unit-id must be 1..247")
     if not 1 <= args.chunk_size <= 125:
         parser.error("--chunk-size must be 1..125")
     if args.retries < 0:
@@ -232,10 +247,10 @@ def main() -> int:
     if args.delay < 0:
         parser.error("--delay must be 0 or greater")
 
-    modbus = ModbusTCP(args.host, args.port, args.timeout)
+    modbus = ModbusTCP(args.host, args.port, args.timeout, args.unit_id)
 
     print(
-        f"Connecting to {args.host}:{args.port}, unit/slave 1, FC3; "
+        f"Connecting to {args.host}:{args.port}, unit/slave {args.unit_id}, FC3; "
         f"chunk={args.chunk_size}, retries={args.retries}, delay={args.delay:.2f}s; "
         "persistent TCP session..."
     )
@@ -253,7 +268,7 @@ def main() -> int:
         print(
             "\nThe Ethernet endpoint may still be reachable even when an RTU reply "
             "is missed. Check RS485 termination/timing, Waveshare gateway mode, "
-            "9600/8/N/1, field-validated A/B/GND polarity, and slave ID 1."
+            f"9600/8/N/1, field-validated A/B/GND polarity, and slave ID {args.unit_id}."
         )
         return 2
     finally:

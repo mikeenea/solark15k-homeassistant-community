@@ -4,9 +4,9 @@
 Uses only the Python standard library.
 
 Example:
-    py tools/solark_single_register_test.py 192.0.2.4 183
+    py tools/solark_single_register_test.py XXX.XXX.XXX.XXX 183
 
-Default register is 183 (battery voltage). Unit/slave ID is fixed at 1.
+Default register is 183 (battery voltage). Unit/slave ID defaults to 1 and is configurable.
 No write functions are implemented.
 """
 
@@ -17,7 +17,7 @@ import socket
 import struct
 import sys
 
-UNIT_ID = 1
+DEFAULT_UNIT_ID = 1
 FUNCTION = 3
 
 
@@ -37,15 +37,24 @@ def main() -> int:
     parser.add_argument("address", nargs="?", type=int, default=183, help="Holding register address (default: 183)")
     parser.add_argument("--port", type=int, default=502)
     parser.add_argument("--timeout", type=float, default=5.0)
+    parser.add_argument(
+        "--unit-id",
+        type=int,
+        default=DEFAULT_UNIT_ID,
+        help="Modbus unit/slave ID, 1..247 (default: 1)",
+    )
     args = parser.parse_args()
+
+    if not 1 <= args.unit_id <= 247:
+        parser.error("--unit-id must be 1..247")
 
     transaction_id = 1
     quantity = 1
     pdu = struct.pack(">BHH", FUNCTION, args.address, quantity)
-    request = struct.pack(">HHHB", transaction_id, 0, len(pdu) + 1, UNIT_ID) + pdu
+    request = struct.pack(">HHHB", transaction_id, 0, len(pdu) + 1, args.unit_id) + pdu
 
     print(f"Connecting to {args.host}:{args.port}")
-    print(f"Reading holding register {args.address}, slave {UNIT_ID}, FC3, quantity 1")
+    print(f"Reading holding register {args.address}, slave {args.unit_id}, FC3, quantity 1")
     print("TX Modbus TCP:", request.hex(" ").upper())
 
     try:
@@ -62,7 +71,7 @@ def main() -> int:
     response = mbap + body
     print("RX Modbus TCP:", response.hex(" ").upper())
 
-    if tid != transaction_id or protocol != 0 or unit != UNIT_ID:
+    if tid != transaction_id or protocol != 0 or unit != args.unit_id:
         print(f"FAILED: unexpected MBAP header tid={tid} protocol={protocol} unit={unit}", file=sys.stderr)
         return 3
 

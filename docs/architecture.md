@@ -15,8 +15,8 @@ The project is intentionally **read-only** during initial development and field 
                                |
                                v
                     +-----------------------+
-                    | Waveshare 2-CH        |
-                    | RS485 TO POE ETH (B)  |
+                    | Isolated gateway      |
+                    | endpoints 1 and 2     |
                     +-----------+-----------+
                                 |
                  +--------------+--------------+
@@ -35,7 +35,7 @@ The project is intentionally **read-only** during initial development and field 
                       BMS                            BMS
 ```
 
-Each inverter gets its own isolated RS485 channel. This avoids placing two inverters on a shared serial bus and allows each Sol-Ark to be addressed using the fixed slave ID defined by the public V1.4 map.
+Each inverter gets its own isolated RS485 channel. This avoids placing two inverters on a shared serial bus and allows each Sol-Ark endpoint and unit ID to be validated independently.
 
 ## Data flow
 
@@ -68,7 +68,7 @@ The Sol-Ark public V1.4 document describes read operations for this map. This re
 
 ### 2. One serial channel per inverter
 
-A two-channel gateway is preferred to a multidrop RS485 bus for the initial system. Benefits include:
+A two-channel gateway or two single-channel gateways are preferred to a multidrop RS485 bus. Benefits include:
 
 - independent troubleshooting;
 - no shared-bus collisions between inverter interfaces;
@@ -118,24 +118,22 @@ Keeping raw values makes future reinterpretation possible if firmware behavior d
 
 ## Addressing model
 
-The public V1.4 protocol states that the slave ID for this map is fixed at `0x01` and that the Parallel-screen Modbus SN does not change this map's slave ID.
-
-Therefore, with independent channels:
+The public V1.4 protocol documents unit ID `0x01`, but field testing demonstrated that parallel addressing can affect the Modbus unit ID. The validated pair used:
 
 ```text
-Waveshare CH1 -> Sol-Ark #1 -> slave 1
-Waveshare CH2 -> Sol-Ark #2 -> slave 1
+Waveshare endpoint 1 -> Sol-Ark #1 -> unit ID 1
+Waveshare endpoint 2 -> Sol-Ark #2 -> unit ID 2
 ```
 
-The two devices are distinguished by separate TCP endpoints rather than separate Modbus slave IDs.
+The integration therefore stores both the TCP endpoint and unit ID per inverter. Register 183 should be tested on each endpoint before Home Assistant polling is enabled.
 
 ## Suggested network plan
 
 Example only:
 
 ```text
-Waveshare CH1: 192.0.2.241:502
-Waveshare CH2: 192.0.2.242:502
+Gateway endpoint 1: XXX.XXX.XXX.XXX:502
+Gateway endpoint 2: XXX.XXX.XXX.XXX:502
 Home Assistant: existing HA address
 ```
 

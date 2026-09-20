@@ -10,7 +10,7 @@ This is the primary installation path for the repository. It covers one standalo
 |---|---|---|
 | RS485 links | One isolated link | Two isolated links, one per inverter |
 | Gateway endpoints | One IP/port | Two IP/port endpoints or two independently addressed channels |
-| Modbus slave ID | `1` | `1` on both endpoints |
+| Modbus unit ID | `1` unless tested otherwise | Validate each inverter; field-confirmed pair used `1` and `2` |
 | Home Assistant entries | One | Two |
 | Recommended entry names | `Sol-Ark 15K #1` | `Sol-Ark 15K #1` and `Sol-Ark 15K #2` |
 | Entity namespaces | `sensor.sol_ark_15k_1_*` | `sensor.sol_ark_15k_1_*` and `sensor.sol_ark_15k_2_*` |
@@ -39,10 +39,10 @@ TCP role: server
 TCP port: 502
 Serial: 9600 baud, 8 data bits, no parity, 1 stop bit
 Storage/autopolling: disabled
-Sol-Ark slave ID: 1
+Sol-Ark unit ID: validate per inverter; default 1
 ```
 
-Use DHCP reservations or static addresses appropriate for your network. Addresses in this repository such as `192.0.2.x` are documentation examples and must not be copied as production addresses.
+Use DHCP reservations or static addresses appropriate for your network. `XXX.XXX.XXX.XXX` means the actual gateway address assigned by the user.
 
 ## 3. Wire and validate the first inverter
 
@@ -53,13 +53,13 @@ Use DHCP reservations or static addresses appropriate for your network. Addresse
 5. Confirm TCP port 502:
 
    ```powershell
-   Test-NetConnection <gateway-ip> -Port 502
+   Test-NetConnection XXX.XXX.XXX.XXX -Port 502
    ```
 
 6. From the repository root, run:
 
    ```powershell
-   python tools/solark_modbus_probe.py <gateway-ip>
+   py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX --unit-id 1
    ```
 
 7. Confirm battery voltage, SOC, PV, load, and temperature values are plausible.
@@ -109,7 +109,7 @@ Do not run the legacy YAML commissioning package and the custom integration agai
 
    ```text
    Name: Sol-Ark 15K #1
-   Host: <gateway endpoint for inverter 1>
+   Host: XXX.XXX.XXX.XXX
    Port: 502
    Slave ID: 1
    ```
@@ -132,15 +132,19 @@ Complete this section only after inverter 1 is stable.
 
 1. Wire inverter 2 to a separate RS485 gateway channel or separate gateway.
 2. Assign it a different network endpoint from inverter 1.
-3. Use the same serial settings and slave ID `1`.
-4. Run the Python probe directly against inverter 2's endpoint.
+3. Use the same serial settings, but validate inverter 2's unit ID with register 183. A field-tested parallel pair used unit ID `2` for inverter 2.
+4. Run the Python probe directly against inverter 2's endpoint using the confirmed ID:
+
+   ```powershell
+   py .\tools\solark_modbus_probe.py XXX.XXX.XXX.XXX --unit-id 2
+   ```
 5. Add **Sol-Ark 15K Modbus** a second time in Home Assistant:
 
    ```text
    Name: Sol-Ark 15K #2
-   Host: <gateway endpoint for inverter 2>
+   Host: XXX.XXX.XXX.XXX
    Port: 502
-   Slave ID: 1
+   Slave ID: 2
    ```
 
 6. Confirm entities beginning with:
@@ -152,7 +156,7 @@ Complete this section only after inverter 1 is stable.
 7. Validate both devices independently before using combined values.
 8. Review [dual-inverter.md](dual-inverter.md) before summing any register. Some values may be per-inverter, duplicated system values, or master-only values depending on firmware and parallel configuration.
 
-The Parallel-screen Modbus serial number does not replace slave ID `1` in this design. The two inverters are distinguished by their separate TCP endpoints.
+The unit ID must be validated for each inverter. On the field-tested pair, inverter 1 used ID `1` and inverter 2 used ID `2`; both also used separate TCP endpoints.
 
 ## 7. Configure InfluxDB
 
@@ -169,9 +173,10 @@ The supplied Grafana dashboards expect the standard Home Assistant InfluxDB sche
        entity_globs:
          - sensor.sol_ark_15k_1_*
          - sensor.sol_ark_15k_2_*
+         - sensor.sol_ark_15k_x2_*
    ```
 
-   For one inverter, the inverter 2 glob may be omitted.
+   For one inverter, the inverter 2 and x2 globs may be omitted. The x2 namespace begins accumulating history only after two entries are active and the x2 glob is loaded by Home Assistant's InfluxDB integration.
 
 5. Confirm recent points exist before importing dashboards.
 6. Never commit tokens, passwords, internal certificates, or production database exports.

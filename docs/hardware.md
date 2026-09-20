@@ -5,7 +5,7 @@
 For the reference two-inverter installation:
 
 - 2 × Sol-Ark 15K hybrid inverters.
-- 1 × Waveshare **2-CH RS485 TO POE ETH (B)** gateway.
+- either 1 × Waveshare **2-CH RS485 TO POE ETH (B)** or 2 × independently addressed Waveshare **RS232/485/422 TO POE ETH (B)** gateways.
 - Existing Sol-Ark/SolarAssistant CAN/RS485 splitters, if already installed and proven.
 - 2 × passive RJ45 patch leads or RJ45-to-terminal leads for the splitter RS485 outputs.
 - 1 × Ethernet connection from the Waveshare to the LAN.
@@ -13,9 +13,9 @@ For the reference two-inverter installation:
 - Multimeter with continuity and resistance modes.
 - Optional 120-ohm RS485 termination resistor if the Waveshare channel does not already provide the required master-side termination.
 
-## Why the two-channel Waveshare
+## Supported gateway arrangements
 
-The two-channel gateway is preferred because each Sol-Ark can remain on its own serial path. It provides a single Ethernet/PoE appliance while avoiding a shared RS485 multidrop bus during commissioning.
+The two-channel gateway provides a single Ethernet/PoE appliance while keeping each Sol-Ark on its own serial path. Two single-channel gateways provide the same electrical separation and have also been field validated. Do not connect the two inverters to one shared two-wire RS485 bus.
 
 Reference topology:
 
@@ -23,6 +23,14 @@ Reference topology:
 Sol-Ark #1 RS485 -> Waveshare CH1
 Sol-Ark #2 RS485 -> Waveshare CH2
 Waveshare Ethernet -> LAN -> Home Assistant
+```
+
+Alternative topology:
+
+```text
+Sol-Ark #1 RS485 -> single-channel Waveshare A -> LAN
+Sol-Ark #2 RS485 -> single-channel Waveshare B -> LAN
+LAN -> Home Assistant
 ```
 
 ## Existing SolarAssistant cabling
@@ -100,8 +108,8 @@ Label both ends of each cable:
 ```text
 SOLARK-1-RS485
 SOLARK-2-RS485
-WAVESHARE-CH1
-WAVESHARE-CH2
+WAVESHARE-ENDPOINT-1
+WAVESHARE-ENDPOINT-2
 ```
 
 Also record:

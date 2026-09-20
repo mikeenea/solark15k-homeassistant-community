@@ -28,6 +28,7 @@ from .const import (
     DEFAULT_REQUEST_TIMEOUT,
     DEFAULT_RETRIES,
     DEFAULT_SLAVE_ID,
+    MASTER_SLAVE_ID,
     PLATFORMS,
 )
 from .coordinator import SolArkDataUpdateCoordinator
@@ -98,6 +99,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
         fault_interval=fault_interval,
         detail_interval=detail_interval,
         energy_interval=energy_interval,
+        include_settings=client.slave_id == MASTER_SLAVE_ID,
         name=entry.title,
     )
     coordinator.seed_registers({183: battery_voltage[0]})

@@ -2,9 +2,9 @@
 
 ## Target device
 
-This project targets the **Waveshare 2-CH RS485 TO POE ETH (B)** gateway for the permanent two-inverter installation.
+This project supports the **Waveshare 2-CH RS485 TO POE ETH (B)** and the single-channel **Waveshare RS232/485/422 TO POE ETH (B)**.
 
-The reference design uses one RS485 channel per Sol-Ark 15K inverter.
+The required design rule is one isolated RS485/TCP endpoint per Sol-Ark 15K inverter. That may be two channels of one gateway or two independently addressed single-channel gateways.
 
 Official Waveshare references:
 
@@ -13,9 +13,9 @@ Official Waveshare references:
 
 Waveshare is credited as the source for gateway capabilities, serial-mode/terminal information, Ethernet/PoE behavior, and Modbus-gateway configuration details used by this guide. See `../THIRD_PARTY_NOTICES.md`.
 
-## Temporary single-channel commissioning gateway
+## Single-channel gateway
 
-A **Waveshare RS232/485/422 TO POE ETH (B)** can be used to commission and validate one Sol-Ark at a time before the permanent dual-channel gateway is installed.
+A **Waveshare RS232/485/422 TO POE ETH (B)** can monitor one Sol-Ark. Two independently addressed units can monitor two inverters simultaneously.
 
 Official reference:
 
@@ -53,15 +53,15 @@ This is an installation-specific field result for the **single-channel RS232/485
 
 Leave the RS422 receive terminals unused when operating in RS485 mode. If the unit is powered by PoE, its separate DC power input is not needed.
 
-This single-channel unit is suitable for validating the complete path for Sol-Ark #1, then can be moved to Sol-Ark #2 for a second independent test. It does not replace the permanent dual-channel topology if simultaneous monitoring of both inverters is required.
+One single-channel unit can be moved between inverters for commissioning. Two single-channel units form a supported permanent topology for simultaneous monitoring.
 
 ## Recommended initial network plan
 
 Example only:
 
 ```text
-Channel 1 / Sol-Ark #1: 192.0.2.241:502
-Channel 2 / Sol-Ark #2: 192.0.2.242:502
+Endpoint 1 / Sol-Ark #1: XXX.XXX.XXX.XXX:502
+Endpoint 2 / Sol-Ark #2: XXX.XXX.XXX.XXX:502
 ```
 
 Use addresses appropriate for your LAN and preferably reserve them in DHCP or configure static addresses outside the DHCP pool.
@@ -119,7 +119,7 @@ Home Assistant receives response
 ### Channel 1
 
 1. Connect only Sol-Ark #1.
-2. Configure CH1 IP address, or the single-channel gateway IP during temporary testing.
+2. Configure endpoint 1, whether CH1 on a dual-channel gateway or the first single-channel gateway.
 3. Configure 9600/8/N/1.
 4. Select Modbus TCP ↔ RTU.
 5. Confirm port 502.
@@ -130,16 +130,16 @@ Home Assistant receives response
 
 ### Channel 2
 
-Do not configure or connect CH2 until CH1 has proven stable.
+Do not configure or connect endpoint 2 until endpoint 1 has proven stable.
 
-Then repeat the same settings with a different IP address on the permanent two-channel gateway. If using the temporary single-channel gateway, move it to Sol-Ark #2 only after the Sol-Ark #1 test is complete.
+Then repeat the same settings for endpoint 2. This may be CH2 on the dual-channel gateway or a second single-channel gateway with its own network address. If only one single-channel gateway is available during commissioning, move it to Sol-Ark #2 only after the Sol-Ark #1 test is complete.
 
 ## TCP reachability test
 
 From Windows PowerShell:
 
 ```powershell
-Test-NetConnection 192.0.2.241 -Port 502
+Test-NetConnection XXX.XXX.XXX.XXX -Port 502
 ```
 
 Expected result:
@@ -152,16 +152,14 @@ This confirms only that the Ethernet/TCP service is reachable. It does **not** c
 
 ## Modbus endpoint model
 
-The public Sol-Ark V1.4 map defines the inverter slave ID as `1`.
-
-Therefore:
+The public Sol-Ark V1.4 map documents unit ID `1`, but a field-tested parallel pair used unit ID `1` for inverter 1 and unit ID `2` for inverter 2. Validate each endpoint with an FC3 read of register 183.
 
 ```text
-CH1 endpoint: 192.0.2.241:502, slave 1
-CH2 endpoint: 192.0.2.242:502, slave 1
+Inverter 1 endpoint: XXX.XXX.XXX.XXX:502, unit ID 1
+Inverter 2 endpoint: XXX.XXX.XXX.XXX:502, unit ID 2
 ```
 
-Do not substitute the inverter's Parallel-screen Modbus SN as the slave ID for this map.
+Use the integration's per-entry unit-ID field. Do not assume both parallel inverters share unit ID 1.
 
 ## Timeout settings
 

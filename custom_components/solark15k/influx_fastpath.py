@@ -15,10 +15,7 @@ simply updates the existing point.
 
 from __future__ import annotations
 
-from datetime import datetime
 import logging
-import math
-import time
 from urllib.parse import urlencode
 
 from homeassistant.config_entries import ConfigEntryState
@@ -26,6 +23,8 @@ from homeassistant.const import EVENT_STATE_CHANGED
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+from .influx_line_protocol import event_json_to_line
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,28 +40,6 @@ INFLUX_BUCKET = "bucket"
 # single HTTP write without adding noticeable dashboard latency.
 FLUSH_DELAY_SECONDS = 0.25
 HTTP_TIMEOUT_SECONDS = 10
-
-
-def _escape_measurement(value: str) -> str:
-    """Escape an InfluxDB line-protocol measurement."""
-    return value.replace("\\", "\\\\").replace(",", "\\,").replace(" ", "\\ ")
-
-
-def _escape_tag(value: str) -> str:
-    """Escape an InfluxDB line-protocol tag key/value."""
-    return (
-        value.replace("\\", "\\\\")
-        .replace(",", "\\,")
-        .replace("=", "\\=")
-        .replace(" ", "\\ ")
-    )
-
-
-def _timestamp_ns(value: object) -> int:
-    """Convert an event datetime to InfluxDB nanoseconds."""
-    if isinstance(value, datetime):
-        return int(value.timestamp() * 1_000_000_000)
-    return time.time_ns()
 
 
 class SolArkInfluxFastPath:
@@ -177,29 +154,9 @@ class SolArkInfluxFastPath:
                 # Respect the user's existing Home Assistant Influx include/exclude filter.
                 continue
 
-            fields = event_json.get("fields", {})
-            value = fields.get("value")
-            if isinstance(value, bool) or not isinstance(value, (int, float)):
-                continue
-
-            numeric_value = float(value)
-            if not math.isfinite(numeric_value):
-                continue
-
-            measurement = event_json.get("measurement")
-            if not measurement:
-                continue
-
-            tags = event_json.get("tags", {})
-            tag_text = "".join(
-                f",{_escape_tag(str(key))}={_escape_tag(str(tag_value))}"
-                for key, tag_value in sorted(tags.items())
-            )
-            timestamp = _timestamp_ns(event_json.get("time"))
-            lines.append(
-                f"{_escape_measurement(str(measurement))}{tag_text} "
-                f"value={numeric_value!r} {timestamp}"
-            )
+            line = event_json_to_line(event_json)
+            if line is not None:
+                lines.append(line)
 
         if not lines:
             return

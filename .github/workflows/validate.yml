@@ -29,6 +29,9 @@ jobs:
           python -m py_compile tools/*.py
           python -m py_compile custom_components/solark15k/*.py
 
+      - name: Run dependency-free unit tests
+        run: python -m unittest discover -s tests -v
+
       - name: Validate JSON files
         shell: python
         run: |
@@ -40,6 +43,9 @@ jobs:
               with path.open("r", encoding="utf-8") as handle:
                   json.load(handle)
               print(f"OK: {path}")
+
+      - name: Validate supported Grafana dashboards
+        run: python tools/validate_grafana_dashboards.py
 
       - name: Parse YAML files
         shell: python
@@ -59,7 +65,43 @@ jobs:
                   failed = True
                   print(f"FAILED: {path}: {exc}", file=sys.stderr)
           if failed:
-              raise SystemExit(1)
+            raise SystemExit(1)
+
+      - name: Validate release boundary and documentation links
+        shell: python
+        run: |
+          import json
+          import re
+          from pathlib import Path
+
+          manifest = json.loads(Path("custom_components/solark15k/manifest.json").read_text())
+          version = manifest["version"]
+          changelog = Path("CHANGELOG.md").read_text()
+          if f"## [{version}]" not in changelog:
+              raise SystemExit(f"manifest version {version} is missing from CHANGELOG.md")
+
+          integration_text = "\n".join(
+              path.read_text(encoding="utf-8")
+              for path in Path("custom_components/solark15k").glob("*.py")
+          )
+          if "FC_WRITE" in integration_text or "write_single" in integration_text:
+              raise SystemExit("stable integration contains a Modbus write implementation")
+          if Path("tools/solark_tou_research.py").exists():
+              raise SystemExit("experimental TOU utility must not exist on the stable branch")
+
+          broken = []
+          for path in [Path("README.md"), *Path("docs").glob("*.md")]:
+              text = path.read_text(encoding="utf-8")
+              for target in re.findall(r"\[[^]]*\]\(([^)]+)\)", text):
+                  if "://" in target or target.startswith(("#", "mailto:")):
+                      continue
+                  destination = (path.parent / target.split("#", 1)[0]).resolve()
+                  if not destination.exists():
+                      broken.append(f"{path}: {target}")
+          if broken:
+              raise SystemExit("broken documentation links:\n" + "\n".join(broken))
+
+          print(f"Validated stable read-only release boundary for {version}")
 
       - name: Check CSV register map
         shell: python
