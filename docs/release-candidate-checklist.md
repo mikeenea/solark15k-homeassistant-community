@@ -1,7 +1,7 @@
-# 0.9.0 release-candidate checklist
+# 1.0.0 release acceptance checklist
 
-This checklist qualifies the public read-only package before `1.0.0`. Regular
-users do not need to repeat register research or development testing. They only
+This checklist records acceptance of the stable public read-only `1.0.0` package.
+Regular users do not need to repeat register research or development testing. They only
 need to complete the applicable clean-install or upgrade checks below.
 
 ## Automated release gates
@@ -69,5 +69,5 @@ Record the following in the GitHub release or validation issue:
 | Dashboard imports | Four supported dashboards import without structural errors |
 | Stable branch safety | No Modbus write implementation |
 
-Any failed required result blocks promotion to `1.0.0` until it is corrected or
-explicitly documented as outside the supported release boundary.
+Any failed required result blocks a stable release or maintenance update until it
+is corrected or explicitly documented as outside the supported release boundary.

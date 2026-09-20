@@ -120,7 +120,7 @@ Tracking issue: #1
 - [x] `0.3.1`: automatic two-inverter x2 entities and startup-race correction
 - [x] `0.4.0`: field-tested documentation, x2 historian/dashboard baseline, and dashboard CI
 - [x] `0.9.0`: expanded integration tests and clean-install/upgrade release candidate
-- [ ] `1.0.0`: stable read-only one- and two-inverter release
+- [x] `1.0.0`: stable read-only one- and two-inverter release
 
 ## Explicitly out of scope for initial releases
 
