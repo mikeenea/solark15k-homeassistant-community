@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.1.0rc1] - 2026-09-21
+
+### Added
+
+- Explicit Read only and Read/write installation modes, with Read only as the
+  safe default and a Configure option for changing modes later.
+- Master-only six-period TOU time, power, capacity, and charge controls.
+- Confirmed Generator Charge, Generator Start Capacity, and Generator Charge
+  Current controls.
+- Open-loop fallback Battery Absorption and Battery Float voltage settings.
+
+### Validated
+
+- FC16 quantity-one writes with read-before-write and immediate FC3 read-back.
+- Master-to-slave propagation through the Sol-Ark parallel communications link.
+- Read-only slave behavior and master-only writable entities.
+- Correct x2 ownership on the unit-ID-1 master.
+- Home Assistant box-mode numeric controls, including retry count.
+
+### Safety boundary
+
+- Read/write requires explicit opt-in and is available only on the master.
+- Writes preserve packed-register bits and fail closed when the cached value or
+  read-back verification does not match.
+- Closed-loop BMS operation may overwrite fallback absorption and float values.
+
 ## 1.1.0b6 - Explicit access modes
 
 - Add Read only and Read/write installation modes, with Read only as the safe

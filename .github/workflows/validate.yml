@@ -84,10 +84,21 @@ jobs:
               path.read_text(encoding="utf-8")
               for path in Path("custom_components/solark15k").glob("*.py")
           )
-          if "FC_WRITE" in integration_text or "write_single" in integration_text:
-              raise SystemExit("stable integration contains a Modbus write implementation")
-          if Path("tools/solark_tou_research.py").exists():
-              raise SystemExit("experimental TOU utility must not exist on the stable branch")
+          required_safety_markers = (
+              "DEFAULT_ACCESS_MODE = ACCESS_MODE_READ_ONLY",
+              "ACCESS_MODE_READ_WRITE",
+              "READ_ONLY_PLATFORMS",
+              "async_write_verified_register",
+              "async_write_holding_one",
+          )
+          missing_safety = [
+              marker for marker in required_safety_markers
+              if marker not in integration_text
+          ]
+          if missing_safety:
+              raise SystemExit(
+                  "missing read/write safety markers: " + ", ".join(missing_safety)
+              )
 
           broken = []
           for path in [Path("README.md"), *Path("docs").glob("*.md")]:
@@ -101,7 +112,7 @@ jobs:
           if broken:
               raise SystemExit("broken documentation links:\n" + "\n".join(broken))
 
-          print(f"Validated stable read-only release boundary for {version}")
+          print(f"Validated explicit-opt-in read/write release boundary for {version}")
 
       - name: Check CSV register map
         shell: python

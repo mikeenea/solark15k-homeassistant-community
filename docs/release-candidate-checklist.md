@@ -1,6 +1,6 @@
-# 1.0.0 release acceptance checklist
+# 1.1.0 release-candidate acceptance checklist
 
-This checklist records acceptance of the stable public read-only `1.0.0` package.
+This checklist records acceptance of the public `1.1.0rc1` package.
 Regular users do not need to repeat register research or development testing. They only
 need to complete the applicable clean-install or upgrade checks below.
 
@@ -14,7 +14,7 @@ Every pull request and push to `main` must pass:
 - JSON and YAML parsing;
 - all four supported Grafana dashboard structural checks;
 - HACS/release metadata checks;
-- read-only stable-branch enforcement; and
+- explicit read/write opt-in and master-only control enforcement; and
 - register-map validation.
 
 ## Clean install: one inverter
@@ -28,6 +28,8 @@ Every pull request and push to `main` must pass:
 5. Confirm no `Sol-Ark 15K x2` device is created.
 6. If InfluxDB is enabled, confirm one `sol_ark_15k_1_*` numeric entity is
    receiving current points before importing dashboards.
+7. Confirm Read only is selected by default and no number or switch controls are
+   loaded until Read/write is explicitly selected.
 
 ## Clean install: two parallel inverters
 
@@ -43,6 +45,21 @@ Every pull request and push to `main` must pass:
    rather than reporting a misleading partial system total.
 6. If InfluxDB is enabled, confirm `sol_ark_15k_1_*`,
    `sol_ark_15k_2_*`, and `sol_ark_15k_x2_*` series receive current points.
+7. Set inverter 1 to Read/write and leave inverter 2 Read only. Confirm controls
+   appear only on inverter 1 and the x2 device is associated only with inverter 1.
+
+## Read/write acceptance
+
+1. Confirm the selected entry uses Modbus unit ID `1` and represents the
+   standalone inverter or parallel-system master.
+2. Change one low-risk validated setting by its smallest permitted increment.
+3. Confirm the write uses FC16 quantity one and passes immediate FC3 read-back.
+4. For a parallel system, confirm the slave inherits the setting without a
+   direct write to inverter 2.
+5. Restore the original value and verify no register difference remains.
+6. Return the integration to Read only and confirm writable entity states unload
+   while telemetry continues updating.
+7. Return the master to Read/write if writable operation is desired.
 
 ## Upgrade from 0.4.x
 
@@ -67,7 +84,9 @@ Record the following in the GitHub release or validation issue:
 | Reload/unload | No duplicate x2 device or entities |
 | InfluxDB optional path | Numeric events write; missing InfluxDB does not block setup |
 | Dashboard imports | Four supported dashboards import without structural errors |
-| Stable branch safety | No Modbus write implementation |
+| Default safety | New and upgraded entries default to Read only unless explicitly changed |
+| Write boundary | Writable entities exist only on the unit-ID-1 master |
+| Verified controls | One low-risk setting changes, propagates, restores, and passes read-back |
 
 Any failed required result blocks a stable release or maintenance update until it
 is corrected or explicitly documented as outside the supported release boundary.
