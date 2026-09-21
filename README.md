@@ -6,7 +6,7 @@ This project provides independent, local access to inverter telemetry through do
 
 > **Project status:** version `1.0.0` provides stable, field-validated, read-only monitoring for one inverter or two parallel inverters, including automatic x2 system entities.
 
-> **Development branch:** `dev/tou-modbus-research` carries version `1.1.0b1` and four field-validated, master-only configuration controls. It is a test build, not the stable 1.0 release. The two numeric controls use direct-entry boxes rather than sliders.
+> **Development branch:** `dev/tou-modbus-research` carries version `1.1.0b2` with a complete six-period, master-only TOU editor and global Generator Charge control. It is a test build, not the stable 1.0 release. Numeric controls use direct-entry boxes rather than sliders.
 
 ## Start here
 
@@ -47,7 +47,7 @@ Each inverter uses its own TCP endpoint. Confirm the Modbus unit ID independentl
 - Troubleshooting and validation procedures.
 - A complete [single- and dual-inverter deployment guide](docs/deployment-guide.md).
 
-Experimental writable-register work remains isolated on `dev/tou-modbus-research`. The current preview exposes only TOU Power Point 1, TOU Capacity Point 1, TOU Charge Point 1, and global Generator Charge on the unit-ID-1 master device. See [`docs/tou-modbus-research.md`](docs/tou-modbus-research.md).
+Experimental writable-register work remains isolated on `dev/tou-modbus-research`. The current preview exposes six TOU times, six power boxes, six capacity boxes, six charge switches, and global Generator Charge on the unit-ID-1 master device. See [`docs/tou-modbus-research.md`](docs/tou-modbus-research.md).
 
 ## Included Grafana dashboards
 

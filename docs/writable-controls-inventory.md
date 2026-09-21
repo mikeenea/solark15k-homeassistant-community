@@ -34,11 +34,13 @@ For a parallel system:
 |---|---:|---|---|---|
 | Time point 1-6 | 250-255 | Decimal HHMM | **Confirmed** | Six `time` entities |
 | Power point 1 | 256 | 1 W | **Confirmed** at 12000 and 11900 W, including restoration | Box-mode `number` entity |
-| Power points 2-6 | 257-261 | 1 W | Strong candidate; not yet field-confirmed | None until individually confirmed |
+| Power point 2 | 257 | 1 W | **Confirmed** at 12000 and 11900 W, including restoration | Box-mode `number` entity |
+| Power points 3-6 | 258-261 | 1 W | Sequential layout inferred from confirmed Points 1-2 | Box-mode `number` entities in development preview |
 | Capacity point 1 | 268 | 1% SOC | **Confirmed** at 50% and 49%, including restoration | Box-mode `number` entity, 0-100% |
-| Capacity points 2-6 | 269-273 | 1% SOC | Strong candidate; not yet field-confirmed | None until individually confirmed |
+| Capacity point 2 | 269 | 1% SOC | **Confirmed** at 50% and 49%, including restoration | Box-mode `number` entity |
+| Capacity points 3-6 | 270-273 | 1% SOC | Sequential layout inferred from confirmed Points 1-2 | Box-mode `number` entities in development preview |
 | Charge point 1 | 274 bit 0 | Packed Boolean flag | **Confirmed**, including bit-preserving interpretation and restoration | `switch` entity |
-| Charge points 2-6 | 275-279 bit 0 | Packed Boolean flag | Strong candidate; not yet field-confirmed | None until individually confirmed |
+| Charge points 2-6 | 275-279 bit 0 | Packed Boolean flag | Sequential layout inferred from Point 1 and the contiguous period table | `switch` entities in development preview |
 | Register 274 bit 1 and equivalent bits | 274-279 bit 1 | Unknown | **Blocked**; Sol-Ark has one charge-point control and separate global source controls | None |
 | Additional period mode bits | 274-279 bits 2-4 | GM/BU/CH labels are not sufficiently defined | Blocked | None until semantics are proven |
 | Overall TOU/day enable | 248 | Packed enable/day bitfield | Candidate and high-impact | Disabled-by-default switches only after validation |

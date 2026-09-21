@@ -1,7 +1,7 @@
 """Constants for the Sol-Ark 15K Modbus integration."""
 
 DOMAIN = "solark15k"
-PLATFORMS = ["sensor", "number", "switch"]
+PLATFORMS = ["sensor", "number", "switch", "time"]
 
 # Development-only writable controls are exposed only for the master inverter.
 # Sol-Ark standalone and parallel master configurations use unit ID 1; the

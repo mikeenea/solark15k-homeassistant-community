@@ -220,3 +220,15 @@ Four additional master settings were isolated with before, after, and restored s
 The Sol-Ark presents one charge enable for each TOU period; it does not present separate grid and generator switches per period. Register 274 bit 0 is therefore identified as **TOU Charge Point 1**, not Grid Charge Point 1. Register 274 bit 1 remains unknown and blocked. Generator charging is enabled globally through register 231.
 
 Development preview `1.1.0b1` exposes these four controls only on the unit-ID-1 master entry. Numeric controls use Home Assistant box mode. Writes use FC16 quantity one, read-before-write comparison, immediate FC3 read-back, coordinator publication only after verification, and read-modify-write for the packed charge flag. No writable controls are created on inverter 2 or the x2 device.
+
+### Six-period expansion — 2026-09-21
+
+Point 2 screen-change testing confirmed register 257 as TOU Power Point 2 (`12000` to `11900`) and register 269 as TOU Capacity Point 2 (`50` to `49`). Both settings were restored with no changed registers remaining. Together with the already-confirmed Point 1 addresses and the documented contiguous table, development preview `1.1.0b2` expands the editor to:
+
+- Time Points 1-6 at registers 250-255 using decimal HHMM;
+- Power Points 1-6 at registers 256-261 using direct watts;
+- Capacity Points 1-6 at registers 268-273 using direct percent;
+- Charge Points 1-6 at registers 274-279 using bit 0 with read-modify-write;
+- global Generator Charge at register 231.
+
+Point 1 and Point 2 establish the sequential layout. Points 3-6 follow that layout but have not each received repetitive individual screen-change testing. Users should allow several seconds for a verified write to appear on the master and then propagate over the parallel communications link to the slave. Do not issue successive changes while the prior value is still propagating.

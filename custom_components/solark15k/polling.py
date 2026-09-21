@@ -31,5 +31,5 @@ def build_poll_groups(live_interval: float, fault_interval: float, detail_interv
         return groups
     return groups + (
         PollGroup("settings_generator", 231, 1, detail_interval, 4),
-        PollGroup("settings_tou_1", 256, 19, detail_interval, 4),
+        PollGroup("settings_tou", 250, 30, detail_interval, 4),
     )

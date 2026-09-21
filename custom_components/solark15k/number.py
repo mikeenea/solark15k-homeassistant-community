@@ -29,29 +29,32 @@ class SolArkNumberDescription(NumberEntityDescription):
     address: int
 
 
-NUMBERS: tuple[SolArkNumberDescription, ...] = (
+NUMBERS: tuple[SolArkNumberDescription, ...] = tuple(
     SolArkNumberDescription(
-        key="tou_power_point_1",
-        name="TOU power point 1",
-        address=256,
+        key=f"tou_power_point_{point}",
+        name=f"TOU power point {point}",
+        address=255 + point,
         native_min_value=0,
         native_max_value=15000,
         native_step=100,
         native_unit_of_measurement="W",
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
-    ),
+    )
+    for point in range(1, 7)
+) + tuple(
     SolArkNumberDescription(
-        key="tou_capacity_point_1",
-        name="TOU capacity point 1",
-        address=268,
+        key=f"tou_capacity_point_{point}",
+        name=f"TOU capacity point {point}",
+        address=267 + point,
         native_min_value=0,
         native_max_value=100,
         native_step=1,
         native_unit_of_measurement="%",
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
-    ),
+    )
+    for point in range(1, 7)
 )
 
 

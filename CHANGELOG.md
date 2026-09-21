@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0b2 - Complete six-period TOU preview
+
+- Add all six decimal-HHMM TOU time entities.
+- Expand box-mode power and capacity inputs from Point 1 to Points 1-6.
+- Expand the packed-bit TOU charge switch from Point 1 to Points 1-6.
+- Poll the complete settings range at the slower detail interval.
+- Record Power Point 2 and Capacity Point 2 field validation.
+
 ## 1.1.0b1 - TOU development preview
 
 - Merge the stable 1.0.0 integration into the TOU research branch.

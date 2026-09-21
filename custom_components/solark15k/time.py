@@ -1,10 +1,11 @@
-"""Development-only Boolean configuration controls for Sol-Ark 15K."""
+"""Development-only TOU time controls for Sol-Ark 15K."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import time
 
-from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
+from homeassistant.components.time import TimeEntity, TimeEntityDescription
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -19,29 +20,20 @@ from .coordinator import SolArkDataUpdateCoordinator
 
 
 @dataclass(frozen=True, kw_only=True)
-class SolArkSwitchDescription(SwitchEntityDescription):
-    """Describe one validated writable Boolean field."""
+class SolArkTimeDescription(TimeEntityDescription):
+    """Describe one validated TOU time register."""
 
     address: int
-    mask: int | None = None
 
 
-SWITCHES: tuple[SolArkSwitchDescription, ...] = tuple(
-    SolArkSwitchDescription(
-        key=f"tou_charge_point_{point}",
-        name=f"TOU charge point {point}",
-        address=273 + point,
-        mask=0x0001,
+TIMES: tuple[SolArkTimeDescription, ...] = tuple(
+    SolArkTimeDescription(
+        key=f"tou_time_point_{point}",
+        name=f"TOU time point {point}",
+        address=249 + point,
         entity_category=EntityCategory.CONFIG,
     )
     for point in range(1, 7)
-) + (
-    SolArkSwitchDescription(
-        key="generator_charge",
-        name="Generator charge",
-        address=231,
-        entity_category=EntityCategory.CONFIG,
-    ),
 )
 
 
@@ -50,22 +42,20 @@ async def async_setup_entry(
     entry: SolArkConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Add controls only to the unit-ID-1 master device."""
+    """Add time controls only to the unit-ID-1 master device."""
     if entry.runtime_data.client.slave_id != MASTER_SLAVE_ID:
         return
-    async_add_entities(
-        SolArkSwitch(entry, description) for description in SWITCHES
-    )
+    async_add_entities(SolArkTime(entry, description) for description in TIMES)
 
 
-class SolArkSwitch(CoordinatorEntity[SolArkDataUpdateCoordinator], SwitchEntity):
-    """Verified switch backed by a full or packed master register."""
+class SolArkTime(CoordinatorEntity[SolArkDataUpdateCoordinator], TimeEntity):
+    """TOU time backed by one decimal-HHMM master register."""
 
     _attr_has_entity_name = True
-    entity_description: SolArkSwitchDescription
+    entity_description: SolArkTimeDescription
 
     def __init__(
-        self, entry: SolArkConfigEntry, description: SolArkSwitchDescription
+        self, entry: SolArkConfigEntry, description: SolArkTimeDescription
     ) -> None:
         super().__init__(entry.runtime_data.coordinator)
         self.entry = entry
@@ -79,29 +69,26 @@ class SolArkSwitch(CoordinatorEntity[SolArkDataUpdateCoordinator], SwitchEntity)
         )
 
     @property
-    def is_on(self) -> bool | None:
-        """Return the latest Boolean state read from the inverter."""
+    def native_value(self) -> time | None:
+        """Decode decimal HHMM from the latest inverter read."""
         raw = cached_register(self.entry, self.entity_description.address)
         if raw is None:
             return None
-        if self.entity_description.mask is None:
-            return raw == 1
-        return bool(raw & self.entity_description.mask)
+        hour, minute = divmod(raw, 100)
+        if hour > 23 or minute > 59:
+            return None
+        return time(hour=hour, minute=minute)
 
-    async def _async_set(self, enabled: bool) -> None:
-        """Write a Boolean while preserving unrelated packed bits."""
+    async def async_set_value(self, value: time) -> None:
+        """Encode and write one TOU time."""
+        if value.second or value.microsecond:
+            raise HomeAssistantError("TOU times must use whole minutes")
         current = cached_register(self.entry, self.entity_description.address)
         if current is None:
             raise HomeAssistantError(
                 "The setting has not been read from the inverter yet; wait for a refresh"
             )
-        mask = self.entity_description.mask
-        if mask is None:
-            requested = 1 if enabled else 0
-        elif enabled:
-            requested = current | mask
-        else:
-            requested = current & ~mask
+        requested = value.hour * 100 + value.minute
         await async_write_verified_register(
             self.entry,
             address=self.entity_description.address,
@@ -109,11 +96,3 @@ class SolArkSwitch(CoordinatorEntity[SolArkDataUpdateCoordinator], SwitchEntity)
             expected=current,
             control_name=self.entity_description.name or self.entity_description.key,
         )
-
-    async def async_turn_on(self, **kwargs: object) -> None:
-        """Enable the setting."""
-        await self._async_set(True)
-
-    async def async_turn_off(self, **kwargs: object) -> None:
-        """Disable the setting."""
-        await self._async_set(False)
