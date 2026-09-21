@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository includes a read-only Home Assistant custom integration at:
+The repository includes a Home Assistant custom integration at:
 
 ```text
 custom_components/solark15k/
@@ -108,6 +108,16 @@ See [deployment-guide.md](deployment-guide.md) for the complete branching proced
 
 During setup the integration performs one read-only check of holding register `183` (battery voltage). If that succeeds, the integration creates a Home Assistant device and starts the tiered scheduler.
 
+The installation form provides two access modes:
+
+- **Read only** is the safe default and loads telemetry sensors only.
+- **Read/write** explicitly enables the validated configuration controls on a
+  unit-ID-1 master. A unit-ID-2 slave remains read only because the master
+  distributes settings through the Sol-Ark parallel communications link.
+
+Access mode can be changed later from the integration's **Configure** page. The
+integration reloads automatically after the option is saved.
+
 ## Change polling intervals
 
 Open:
@@ -116,7 +126,7 @@ Open:
 Settings -> Devices & services -> Sol-Ark 15K Modbus -> Configure
 ```
 
-The Configure screen exposes the live, fault, detail, and energy intervals as well as minimum request spacing, retry quiet time, request timeout, and retry count. Saving the options reloads the integration.
+The Configure screen exposes access mode; the live, fault, detail, and energy intervals; minimum request spacing; retry quiet time; request timeout; and retry count. Retry count uses a direct-entry box instead of a slider. Saving the options reloads the integration.
 
 For initial version `0.2.0` validation, leave the defaults at 5 / 15 / 60 / 300 seconds and the minimum request spacing at 1 second. If the live 31-register request produces retries or timeouts, increase the live interval or minimum request spacing before reducing any timing values.
 

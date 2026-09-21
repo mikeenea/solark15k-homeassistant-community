@@ -11,6 +11,8 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import entity_registry as er
 
 from .const import (
+    ACCESS_MODE_READ_WRITE,
+    CONF_ACCESS_MODE,
     CONF_DETAIL_INTERVAL,
     CONF_ENERGY_INTERVAL,
     CONF_FAULT_INTERVAL,
@@ -21,6 +23,7 @@ from .const import (
     CONF_RETRIES,
     CONF_SLAVE_ID,
     DEFAULT_DETAIL_INTERVAL,
+    DEFAULT_ACCESS_MODE,
     DEFAULT_ENERGY_INTERVAL,
     DEFAULT_FAULT_INTERVAL,
     DEFAULT_INTER_REQUEST_DELAY,
@@ -31,7 +34,8 @@ from .const import (
     DEFAULT_SLAVE_ID,
     DOMAIN,
     MASTER_SLAVE_ID,
-    PLATFORMS,
+    READ_ONLY_PLATFORMS,
+    READ_WRITE_PLATFORMS,
 )
 from .coordinator import SolArkDataUpdateCoordinator
 from .influx_fastpath import SolArkInfluxFastPath
@@ -45,6 +49,7 @@ class SolArkRuntimeData:
     client: SolArkModbusClient
     coordinator: SolArkDataUpdateCoordinator
     influx_fastpath: SolArkInfluxFastPath
+    platforms: tuple[str, ...]
 
 
 type SolArkConfigEntry = ConfigEntry[SolArkRuntimeData]
@@ -97,6 +102,14 @@ def _migrate_control_entity_ids(
 
 async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bool:
     """Set up a Sol-Ark 15K config entry."""
+    access_mode = str(
+        entry.options.get(
+            CONF_ACCESS_MODE,
+            entry.data.get(CONF_ACCESS_MODE, DEFAULT_ACCESS_MODE),
+        )
+    )
+    writable = access_mode == ACCESS_MODE_READ_WRITE
+    platforms = READ_WRITE_PLATFORMS if writable else READ_ONLY_PLATFORMS
     timeout = float(entry.options.get(CONF_REQUEST_TIMEOUT, DEFAULT_REQUEST_TIMEOUT))
     retry_delay = float(
         entry.options.get(CONF_INTER_REQUEST_DELAY, DEFAULT_INTER_REQUEST_DELAY)
@@ -146,7 +159,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
         fault_interval=fault_interval,
         detail_interval=detail_interval,
         energy_interval=energy_interval,
-        include_settings=client.slave_id == MASTER_SLAVE_ID,
+        include_settings=writable and client.slave_id == MASTER_SLAVE_ID,
         name=entry.title,
     )
     coordinator.seed_registers({183: battery_voltage[0]})
@@ -162,10 +175,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
         client=client,
         coordinator=coordinator,
         influx_fastpath=influx_fastpath,
+        platforms=platforms,
     )
     _remove_obsolete_tou_time_entities(hass, entry)
     _migrate_control_entity_ids(hass, entry)
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(entry, platforms)
     await coordinator.async_start()
     return True
 
@@ -173,7 +187,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
 async def async_unload_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bool:
     """Unload a Sol-Ark 15K config entry."""
     await entry.runtime_data.coordinator.async_stop()
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry, entry.runtime_data.platforms
+    )
     if unload_ok:
         await entry.runtime_data.influx_fastpath.async_close()
         await entry.runtime_data.client.async_close()

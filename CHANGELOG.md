@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0b6 - Explicit access modes
+
+- Add Read only and Read/write installation modes, with Read only as the safe
+  default for new and existing installations.
+- Allow access mode to be changed later from the integration's Configure page.
+- Load writable number and switch platforms, and poll configuration registers,
+  only when Read/write is selected on the unit-ID-1 master.
+- Replace the retry-count slider with a direct-entry number box.
+- Anchor the combined x2 device and its entities to the unit-ID-1 master and
+  remove stale inverter-2 device associations created by earlier beta versions.
+
 ## 1.1.0b5 - Confirmed generator inputs
 
 - Add verified box inputs for Generator Start Capacity (register 226, 5% steps)

@@ -9,8 +9,12 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlowWithReload
 from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
+from homeassistant.helpers import selector
 
 from .const import (
+    ACCESS_MODE_READ_ONLY,
+    ACCESS_MODE_READ_WRITE,
+    CONF_ACCESS_MODE,
     CONF_DETAIL_INTERVAL,
     CONF_ENERGY_INTERVAL,
     CONF_FAULT_INTERVAL,
@@ -21,6 +25,7 @@ from .const import (
     CONF_RETRIES,
     CONF_SLAVE_ID,
     DEFAULT_DETAIL_INTERVAL,
+    DEFAULT_ACCESS_MODE,
     DEFAULT_ENERGY_INTERVAL,
     DEFAULT_FAULT_INTERVAL,
     DEFAULT_INTER_REQUEST_DELAY,
@@ -88,6 +93,7 @@ class SolArkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_HOST: host,
                         CONF_PORT: port,
                         CONF_SLAVE_ID: slave_id,
+                        CONF_ACCESS_MODE: str(user_input[CONF_ACCESS_MODE]),
                     },
                 )
 
@@ -100,6 +106,23 @@ class SolArkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
                 vol.Required(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): vol.All(
                     vol.Coerce(int), vol.Range(min=1, max=247)
+                ),
+                vol.Required(
+                    CONF_ACCESS_MODE, default=DEFAULT_ACCESS_MODE
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            {
+                                "value": ACCESS_MODE_READ_ONLY,
+                                "label": "Read only",
+                            },
+                            {
+                                "value": ACCESS_MODE_READ_WRITE,
+                                "label": "Read/write",
+                            },
+                        ],
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
                 ),
             }
         )
@@ -126,6 +149,31 @@ class SolArkOptionsFlow(OptionsFlowWithReload):
         options = self.config_entry.options
         schema = vol.Schema(
             {
+                vol.Required(
+                    CONF_ACCESS_MODE,
+                    default=str(
+                        options.get(
+                            CONF_ACCESS_MODE,
+                            self.config_entry.data.get(
+                                CONF_ACCESS_MODE, DEFAULT_ACCESS_MODE
+                            ),
+                        )
+                    ),
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            {
+                                "value": ACCESS_MODE_READ_ONLY,
+                                "label": "Read only",
+                            },
+                            {
+                                "value": ACCESS_MODE_READ_WRITE,
+                                "label": "Read/write",
+                            },
+                        ],
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
+                ),
                 vol.Required(
                     CONF_LIVE_INTERVAL,
                     default=float(options.get(CONF_LIVE_INTERVAL, DEFAULT_LIVE_INTERVAL)),
@@ -196,7 +244,14 @@ class SolArkOptionsFlow(OptionsFlowWithReload):
                 vol.Required(
                     CONF_RETRIES,
                     default=int(options.get(CONF_RETRIES, DEFAULT_RETRIES)),
-                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=5)),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=5,
+                        step=1,
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                ),
             }
         )
 

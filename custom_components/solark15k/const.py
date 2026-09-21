@@ -1,7 +1,8 @@
 """Constants for the Sol-Ark 15K Modbus integration."""
 
 DOMAIN = "solark15k"
-PLATFORMS = ["sensor", "number", "switch"]
+READ_ONLY_PLATFORMS = ("sensor",)
+READ_WRITE_PLATFORMS = ("sensor", "number", "switch")
 
 # Development-only writable controls are exposed only for the master inverter.
 # Sol-Ark standalone and parallel master configurations use unit ID 1; the
@@ -9,6 +10,10 @@ PLATFORMS = ["sensor", "number", "switch"]
 MASTER_SLAVE_ID = 1
 
 CONF_SLAVE_ID = "slave_id"
+CONF_ACCESS_MODE = "access_mode"
+ACCESS_MODE_READ_ONLY = "read_only"
+ACCESS_MODE_READ_WRITE = "read_write"
+DEFAULT_ACCESS_MODE = ACCESS_MODE_READ_ONLY
 CONF_INTER_REQUEST_DELAY = "inter_request_delay"
 CONF_REQUEST_TIMEOUT = "request_timeout"
 CONF_RETRIES = "retries"
