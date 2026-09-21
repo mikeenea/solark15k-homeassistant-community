@@ -8,8 +8,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import entity_registry as er
 
 from .const import (
+    ACCESS_MODE_READ_WRITE,
+    CONF_ACCESS_MODE,
     CONF_DETAIL_INTERVAL,
     CONF_ENERGY_INTERVAL,
     CONF_FAULT_INTERVAL,
@@ -20,6 +23,7 @@ from .const import (
     CONF_RETRIES,
     CONF_SLAVE_ID,
     DEFAULT_DETAIL_INTERVAL,
+    DEFAULT_ACCESS_MODE,
     DEFAULT_ENERGY_INTERVAL,
     DEFAULT_FAULT_INTERVAL,
     DEFAULT_INTER_REQUEST_DELAY,
@@ -28,7 +32,10 @@ from .const import (
     DEFAULT_REQUEST_TIMEOUT,
     DEFAULT_RETRIES,
     DEFAULT_SLAVE_ID,
-    PLATFORMS,
+    DOMAIN,
+    MASTER_SLAVE_ID,
+    READ_ONLY_PLATFORMS,
+    READ_WRITE_PLATFORMS,
 )
 from .coordinator import SolArkDataUpdateCoordinator
 from .influx_fastpath import SolArkInfluxFastPath
@@ -42,13 +49,67 @@ class SolArkRuntimeData:
     client: SolArkModbusClient
     coordinator: SolArkDataUpdateCoordinator
     influx_fastpath: SolArkInfluxFastPath
+    platforms: tuple[str, ...]
 
 
 type SolArkConfigEntry = ConfigEntry[SolArkRuntimeData]
 
 
+def _remove_obsolete_tou_time_entities(
+    hass: HomeAssistant, entry: SolArkConfigEntry
+) -> None:
+    """Remove beta-2 time entities replaced by beta-3 HHMM number boxes."""
+    registry = er.async_get(hass)
+    unique_prefix = f"{entry.entry_id}_tou_time_point_"
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if (
+            entity.entity_id.startswith("time.")
+            and entity.platform == DOMAIN
+            and entity.unique_id.startswith(unique_prefix)
+        ):
+            registry.async_remove(entity.entity_id)
+
+
+def _migrate_control_entity_ids(
+    hass: HomeAssistant, entry: SolArkConfigEntry
+) -> None:
+    """Normalize beta configuration entity IDs without touching custom IDs."""
+    registry = er.async_get(hass)
+    tou_prefix = f"{entry.entry_id}_tou_"
+    generator_unique_id = f"{entry.entry_id}_generator_charge"
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if entity.platform != DOMAIN or not (
+            entity.unique_id.startswith(tou_prefix)
+            or entity.unique_id == generator_unique_id
+        ):
+            continue
+
+        new_entity_id = entity.entity_id.removesuffix("_hhmm")
+        for entity_domain in ("number", "switch"):
+            duplicate_prefix = f"{entity_domain}.solar_sol_ark_"
+            if new_entity_id.startswith(duplicate_prefix):
+                new_entity_id = (
+                    f"{entity_domain}.sol_ark_"
+                    f"{new_entity_id[len(duplicate_prefix):]}"
+                )
+                break
+
+        if new_entity_id != entity.entity_id and registry.async_get(new_entity_id) is None:
+            registry.async_update_entity(
+                entity.entity_id, new_entity_id=new_entity_id
+            )
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bool:
     """Set up a Sol-Ark 15K config entry."""
+    access_mode = str(
+        entry.options.get(
+            CONF_ACCESS_MODE,
+            entry.data.get(CONF_ACCESS_MODE, DEFAULT_ACCESS_MODE),
+        )
+    )
+    writable = access_mode == ACCESS_MODE_READ_WRITE
+    platforms = READ_WRITE_PLATFORMS if writable else READ_ONLY_PLATFORMS
     timeout = float(entry.options.get(CONF_REQUEST_TIMEOUT, DEFAULT_REQUEST_TIMEOUT))
     retry_delay = float(
         entry.options.get(CONF_INTER_REQUEST_DELAY, DEFAULT_INTER_REQUEST_DELAY)
@@ -98,6 +159,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
         fault_interval=fault_interval,
         detail_interval=detail_interval,
         energy_interval=energy_interval,
+        include_settings=writable and client.slave_id == MASTER_SLAVE_ID,
         name=entry.title,
     )
     coordinator.seed_registers({183: battery_voltage[0]})
@@ -113,8 +175,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
         client=client,
         coordinator=coordinator,
         influx_fastpath=influx_fastpath,
+        platforms=platforms,
     )
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    _remove_obsolete_tou_time_entities(hass, entry)
+    _migrate_control_entity_ids(hass, entry)
+    await hass.config_entries.async_forward_entry_setups(entry, platforms)
     await coordinator.async_start()
     return True
 
@@ -122,7 +187,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
 async def async_unload_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bool:
     """Unload a Sol-Ark 15K config entry."""
     await entry.runtime_data.coordinator.async_stop()
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry, entry.runtime_data.platforms
+    )
     if unload_ok:
         await entry.runtime_data.influx_fastpath.async_close()
         await entry.runtime_data.client.async_close()

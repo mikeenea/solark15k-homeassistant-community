@@ -14,10 +14,11 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, MASTER_SLAVE_ID
 from .calculations import (
     aggregate_x2,
     should_create_x2,
@@ -170,7 +171,11 @@ async def async_setup_x2_sensors(
     """Create one x2 device when exactly two inverter entries are active."""
     domain_data = hass.data.setdefault(DOMAIN, {})
     registrations = domain_data.setdefault("x2_sensor_registrations", {})
-    registrations[entry.entry_id] = entry.runtime_data.coordinator
+    registrations[entry.entry_id] = (
+        entry,
+        entry.runtime_data.coordinator,
+        async_add_entities,
+    )
 
     @callback
     def clear_registration() -> None:
@@ -185,9 +190,52 @@ async def async_setup_x2_sensors(
     ):
         return
 
-    coordinators = tuple(registrations.values())
-    domain_data[_X2_OWNER_KEY] = entry.entry_id
-    async_add_entities(
+    master_registration = next(
+        (
+            registration
+            for registration in registrations.values()
+            if registration[0].runtime_data.client.slave_id == MASTER_SLAVE_ID
+        ),
+        None,
+    )
+    if master_registration is None:
+        return
+
+    master_entry, _, master_add_entities = master_registration
+    coordinators = tuple(
+        registration[1] for registration in registrations.values()
+    )
+    domain_data[_X2_OWNER_KEY] = master_entry.entry_id
+
+    # Early beta versions could attach the shared x2 device or entities to the
+    # slave entry depending on setup order. Move them to the unit-ID-1 master
+    # while retaining entity customizations, then remove stale device links.
+    entity_registry = er.async_get(hass)
+    for registered_entry_id in tuple(registrations):
+        if registered_entry_id == master_entry.entry_id:
+            continue
+        for entity in er.async_entries_for_config_entry(
+            entity_registry, registered_entry_id
+        ):
+            if entity.platform == DOMAIN and entity.unique_id.startswith(
+                "solark15k_x2_"
+            ):
+                entity_registry.async_update_entity(
+                    entity.entity_id,
+                    config_entry_id=master_entry.entry_id,
+                )
+
+    device_registry = dr.async_get(hass)
+    x2_device = device_registry.async_get_device(identifiers={(DOMAIN, "x2")})
+    if x2_device is not None:
+        for registered_entry_id in tuple(x2_device.config_entries):
+            if registered_entry_id != master_entry.entry_id:
+                device_registry.async_update_device(
+                    x2_device.id,
+                    remove_config_entry_id=registered_entry_id,
+                )
+
+    master_add_entities(
         SolArkX2Sensor(coordinators, spec) for spec in _build_specs(descriptions)
     )
 

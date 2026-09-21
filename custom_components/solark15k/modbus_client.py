@@ -1,4 +1,4 @@
-"""Minimal persistent Modbus TCP client for Sol-Ark read-only telemetry."""
+"""Persistent Modbus TCP client for Sol-Ark telemetry and guarded settings."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import asyncio
 import struct
 
 FC_READ_HOLDING = 3
+FC_WRITE_MULTIPLE = 16
 
 
 class SolArkModbusError(Exception):
@@ -71,11 +72,66 @@ def parse_read_holding_response(
     return list(struct.unpack(">" + "H" * expected_count, payload))
 
 
+def build_write_one_request(
+    transaction_id: int, slave_id: int, address: int, value: int
+) -> bytes:
+    """Build an FC16 request containing exactly one holding register."""
+    if not 1 <= slave_id <= 247:
+        raise ValueError("Modbus unit ID must be 1..247")
+    if not 0 <= address <= 0xFFFF:
+        raise ValueError("Modbus register address must be 0..65535")
+    if not 0 <= value <= 0xFFFF:
+        raise ValueError("Modbus register value must be 0..65535")
+    pdu = struct.pack(">BHHBH", FC_WRITE_MULTIPLE, address, 1, 2, value)
+    return struct.pack(">HHHB", transaction_id & 0xFFFF, 0, len(pdu) + 1, slave_id) + pdu
+
+
+def parse_write_one_response(
+    mbap: bytes,
+    body: bytes,
+    expected_transaction_id: int,
+    expected_slave_id: int,
+    expected_address: int,
+) -> None:
+    """Validate an FC16 quantity-one acknowledgement."""
+    if len(mbap) != 7:
+        raise SolArkModbusError(f"Unexpected MBAP length {len(mbap)}")
+    rx_tid, protocol, length, unit = struct.unpack(">HHHB", mbap)
+    if rx_tid != expected_transaction_id:
+        raise SolArkModbusError(
+            "Transaction ID mismatch: "
+            f"sent {expected_transaction_id}, received {rx_tid}"
+        )
+    if protocol != 0:
+        raise SolArkModbusError(f"Unexpected Modbus protocol ID {protocol}")
+    if unit != expected_slave_id:
+        raise SolArkModbusError(
+            f"Unit ID mismatch: expected {expected_slave_id}, received {unit}"
+        )
+    if length != len(body) + 1:
+        raise SolArkModbusError(
+            f"Unexpected Modbus length: header={length}, actual={len(body) + 1}"
+        )
+    if not body:
+        raise SolArkModbusError("Empty Modbus response")
+    function = body[0]
+    if function == (FC_WRITE_MULTIPLE | 0x80):
+        code = body[1] if len(body) > 1 else None
+        raise SolArkModbusError(f"Modbus exception response, code={code}")
+    if function != FC_WRITE_MULTIPLE or len(body) != 5:
+        raise SolArkModbusError("Unexpected FC16 response")
+    address, count = struct.unpack(">HH", body[1:])
+    if address != expected_address or count != 1:
+        raise SolArkModbusError(
+            "FC16 response did not confirm the requested address and count"
+        )
+
+
 class SolArkModbusClient:
     """Persistent Modbus TCP client for a TCP-to-RTU gateway.
 
-    Only FC3 (Read Holding Registers) is implemented. There are deliberately no
-    Modbus write methods in this commissioning integration.
+    Normal telemetry uses FC3. Development-only settings use FC16 with exactly
+    one register plus read-before-write and immediate read-back verification.
     """
 
     def __init__(
@@ -159,6 +215,72 @@ class SolArkModbusClient:
             except (TimeoutError, asyncio.IncompleteReadError, OSError) as err:
                 await self.async_close()
                 raise SolArkModbusError(str(err) or "Modbus request timed out") from err
+            except SolArkModbusError:
+                await self.async_close()
+                raise
+
+    async def _async_exchange(self, request: bytes) -> tuple[bytes, bytes]:
+        """Send one request while the caller holds the client lock."""
+        await self.async_connect()
+        assert self._reader is not None
+        assert self._writer is not None
+        self._writer.write(request)
+        await self._writer.drain()
+        async with asyncio.timeout(self.timeout):
+            mbap = await self._reader.readexactly(7)
+            _, _, length, _ = struct.unpack(">HHHB", mbap)
+            body = await self._reader.readexactly(length - 1)
+        return mbap, body
+
+    async def _async_read_one_locked(self, address: int) -> int:
+        """Read one register while the caller holds the client lock."""
+        self._transaction_id = (self._transaction_id + 1) & 0xFFFF
+        request = build_read_holding_request(
+            self._transaction_id, self.slave_id, address, 1
+        )
+        mbap, body = await self._async_exchange(request)
+        return parse_read_holding_response(
+            mbap, body, self._transaction_id, self.slave_id, 1
+        )[0]
+
+    async def async_write_holding_one(
+        self, address: int, value: int, *, expected: int
+    ) -> int:
+        """Guard, write, and verify one register using FC16 quantity one."""
+        async with self._lock:
+            try:
+                current = await self._async_read_one_locked(address)
+                if current != expected:
+                    raise SolArkModbusError(
+                        f"Register {address} changed before write: "
+                        f"expected {expected}, read {current}"
+                    )
+
+                self._transaction_id = (self._transaction_id + 1) & 0xFFFF
+                request = build_write_one_request(
+                    self._transaction_id, self.slave_id, address, value
+                )
+                mbap, body = await self._async_exchange(request)
+                parse_write_one_response(
+                    mbap,
+                    body,
+                    self._transaction_id,
+                    self.slave_id,
+                    address,
+                )
+
+                actual = await self._async_read_one_locked(address)
+                if actual != value:
+                    raise SolArkModbusError(
+                        f"Register {address} read-back failed: "
+                        f"wrote {value}, read {actual}"
+                    )
+                return actual
+            except (TimeoutError, asyncio.IncompleteReadError, OSError) as err:
+                await self.async_close()
+                raise SolArkModbusError(
+                    str(err) or "Modbus request timed out"
+                ) from err
             except SolArkModbusError:
                 await self.async_close()
                 raise

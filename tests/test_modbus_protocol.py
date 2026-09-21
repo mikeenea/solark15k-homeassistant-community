@@ -1,4 +1,4 @@
-"""Protocol-level tests for read-only Modbus request/response handling."""
+"""Protocol-level tests for Modbus request/response handling."""
 
 from __future__ import annotations
 
@@ -38,6 +38,26 @@ class ModbusProtocolTests(unittest.TestCase):
         mbap = struct.pack(">HHHB", 7, 0, len(body) + 1, 2)
         with self.assertRaisesRegex(modbus.SolArkModbusError, "code=2"):
             modbus.parse_read_holding_response(mbap, body, 7, 2, 1)
+
+    def test_fc16_quantity_one_request(self) -> None:
+        request = modbus.build_write_one_request(9, 1, 256, 11900)
+        self.assertEqual(
+            request,
+            bytes.fromhex("000900000009011001000001022e7c"),
+        )
+
+    def test_fc16_quantity_one_response(self) -> None:
+        body = bytes.fromhex("1001000001")
+        mbap = struct.pack(">HHHB", 9, 0, len(body) + 1, 1)
+        self.assertIsNone(
+            modbus.parse_write_one_response(mbap, body, 9, 1, 256)
+        )
+
+    def test_fc16_wrong_address_is_rejected(self) -> None:
+        body = bytes.fromhex("1001010001")
+        mbap = struct.pack(">HHHB", 9, 0, len(body) + 1, 1)
+        with self.assertRaisesRegex(modbus.SolArkModbusError, "did not confirm"):
+            modbus.parse_write_one_response(mbap, body, 9, 1, 256)
 
 
 if __name__ == "__main__":

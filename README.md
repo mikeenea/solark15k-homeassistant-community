@@ -1,10 +1,12 @@
 # Sol-Ark 15K Home Assistant Modbus
 
-A local, read-only Home Assistant integration for one Sol-Ark 15K inverter or two Sol-Ark 15K inverters operating in parallel, using native Modbus TCP through an Ethernet-to-RS485 gateway.
+A local Home Assistant integration for one Sol-Ark 15K inverter or two Sol-Ark 15K inverters operating in parallel, using native Modbus TCP through an Ethernet-to-RS485 gateway.
 
 This project provides independent, local access to inverter telemetry through documented Sol-Ark Modbus interfaces, Home Assistant, InfluxDB, and Grafana. A standalone installation uses one isolated RS485 endpoint. A parallel installation uses two isolated endpoints, one per inverter.
 
 > **Project status:** version `1.0.0` provides stable, field-validated, read-only monitoring for one inverter or two parallel inverters, including automatic x2 system entities.
+
+> **Release candidate:** `dev/tou-modbus-research` carries version `1.1.0rc1` with explicit Read only and Read/write installation modes. Read only is the safe default. Read/write exposes the validated master-only TOU editor, generator controls, and open-loop fallback absorption/float settings. Numeric controls use direct-entry boxes rather than sliders. During normal closed-loop operation, the BMS may overwrite the fallback voltage values.
 
 ## Start here
 
@@ -44,6 +46,8 @@ Each inverter uses its own TCP endpoint. Confirm the Modbus unit ID independentl
 - Fault-word monitoring and future fault decoding.
 - Troubleshooting and validation procedures.
 - A complete [single- and dual-inverter deployment guide](docs/deployment-guide.md).
+
+Experimental writable-register work remains isolated on `dev/tou-modbus-research`. The current preview exposes six TOU times, six power boxes, six capacity boxes, six charge switches, and global Generator Charge on the unit-ID-1 master device. See [`docs/tou-modbus-research.md`](docs/tou-modbus-research.md).
 
 ## Included Grafana dashboards
 

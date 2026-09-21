@@ -1,5 +1,79 @@
 # Changelog
 
+## [1.1.0rc1] - 2026-09-21
+
+### Added
+
+- Explicit Read only and Read/write installation modes, with Read only as the
+  safe default and a Configure option for changing modes later.
+- Master-only six-period TOU time, power, capacity, and charge controls.
+- Confirmed Generator Charge, Generator Start Capacity, and Generator Charge
+  Current controls.
+- Open-loop fallback Battery Absorption and Battery Float voltage settings.
+
+### Validated
+
+- FC16 quantity-one writes with read-before-write and immediate FC3 read-back.
+- Master-to-slave propagation through the Sol-Ark parallel communications link.
+- Read-only slave behavior and master-only writable entities.
+- Correct x2 ownership on the unit-ID-1 master.
+- Home Assistant box-mode numeric controls, including retry count.
+
+### Safety boundary
+
+- Read/write requires explicit opt-in and is available only on the master.
+- Writes preserve packed-register bits and fail closed when the cached value or
+  read-back verification does not match.
+- Closed-loop BMS operation may overwrite fallback absorption and float values.
+
+## 1.1.0b6 - Explicit access modes
+
+- Add Read only and Read/write installation modes, with Read only as the safe
+  default for new and existing installations.
+- Allow access mode to be changed later from the integration's Configure page.
+- Load writable number and switch platforms, and poll configuration registers,
+  only when Read/write is selected on the unit-ID-1 master.
+- Replace the retry-count slider with a direct-entry number box.
+- Anchor the combined x2 device and its entities to the unit-ID-1 master and
+  remove stale inverter-2 device associations created by earlier beta versions.
+
+## 1.1.0b5 - Confirmed generator inputs
+
+- Add verified box inputs for Generator Start Capacity (register 226, 5% steps)
+  and Generator Charge Current (register 227, 5 A steps) on the master inverter.
+- Add fallback/open-loop Battery Absorption and Battery Float voltage boxes for
+  confirmed registers 202 and 203, with a warning that the BMS may overwrite
+  their values while closed-loop control is healthy.
+
+## 1.1.0b4 - Obsolete entity cleanup
+
+- Automatically remove the six beta-2 time-domain entities from the Home Assistant entity registry.
+- Retain only the replacement TOU time Point 1-6 HHMM number boxes.
+- Remove the unnecessary HHMM label and `_hhmm` entity-ID suffix from all six replacement boxes.
+- Normalize the accidental `solar_sol_ark` prefix to `sol_ark` for all new number and switch controls.
+
+## 1.1.0b3 - HHMM box correction
+
+- Replace the six Home Assistant time entities with direct-entry number boxes.
+- Store and display the inverter's native decimal HHMM values without conversion.
+- Reject invalid HHMM entries such as 1260 or 2400 before any Modbus write.
+
+## 1.1.0b2 - Complete six-period TOU preview
+
+- Add all six decimal-HHMM TOU time entities.
+- Expand box-mode power and capacity inputs from Point 1 to Points 1-6.
+- Expand the packed-bit TOU charge switch from Point 1 to Points 1-6.
+- Poll the complete settings range at the slower detail interval.
+- Record Power Point 2 and Capacity Point 2 field validation.
+
+## 1.1.0b1 - TOU development preview
+
+- Merge the stable 1.0.0 integration into the TOU research branch.
+- Add master-only, verified FC16 writes with read-before-write and read-back.
+- Add box-mode TOU Power Point 1 and Capacity Point 1 number entities.
+- Add TOU Charge Point 1 and global Generator Charge switches.
+- Keep all controls off the inverter 2 and x2 devices.
+
 All notable project changes will be documented here.
 
 Single-inverter monitoring and the field-validated two-inverter read path are stable. Built-in x2 aggregation is available when exactly two entries are active.
@@ -111,6 +185,8 @@ Single-inverter monitoring and the field-validated two-inverter read path are st
 
 ### Added
 
+- Development-only TOU register snapshot, comparison, and guarded single-register research utility.
+- Field-validated TOU time registers 250–255, decimal HHMM encoding, and master-only FC16 quantity-one writes with parallel-slave inheritance.
 - Public deployment guide with explicit one-inverter and two-parallel-inverter paths.
 - Concise standalone-inverter installation guide.
 - HACS custom-repository metadata.

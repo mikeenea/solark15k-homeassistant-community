@@ -31,6 +31,7 @@ class SolArkDataUpdateCoordinator(DataUpdateCoordinator[dict[int, int]]):
         detail_interval: float,
         energy_interval: float,
         name: str,
+        include_settings: bool = False,
     ) -> None:
         self.client = client
         self.retry_delay = retry_delay
@@ -42,6 +43,7 @@ class SolArkDataUpdateCoordinator(DataUpdateCoordinator[dict[int, int]]):
             fault_interval,
             detail_interval,
             energy_interval,
+            include_settings=include_settings,
         )
 
         self._registers: dict[int, int] = {}
@@ -60,6 +62,11 @@ class SolArkDataUpdateCoordinator(DataUpdateCoordinator[dict[int, int]]):
     def seed_registers(self, registers: dict[int, int]) -> None:
         """Seed known values obtained during config-entry setup."""
         self._registers.update(registers)
+        self.async_set_updated_data(dict(self._registers))
+
+    def publish_register(self, address: int, value: int) -> None:
+        """Publish a verified setting immediately after a successful write."""
+        self._registers[address] = value
         self.async_set_updated_data(dict(self._registers))
 
     async def async_start(self) -> None:
