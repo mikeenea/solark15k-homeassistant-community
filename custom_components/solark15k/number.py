@@ -27,9 +27,23 @@ class SolArkNumberDescription(NumberEntityDescription):
     """Describe one validated writable numeric register."""
 
     address: int
+    decimal_hhmm: bool = False
 
 
 NUMBERS: tuple[SolArkNumberDescription, ...] = tuple(
+    SolArkNumberDescription(
+        key=f"tou_time_point_{point}",
+        name=f"TOU time point {point} (HHMM)",
+        address=249 + point,
+        native_min_value=0,
+        native_max_value=2359,
+        native_step=1,
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+        decimal_hhmm=True,
+    )
+    for point in range(1, 7)
+) + tuple(
     SolArkNumberDescription(
         key=f"tou_power_point_{point}",
         name=f"TOU power point {point}",
@@ -101,6 +115,12 @@ class SolArkNumber(CoordinatorEntity[SolArkDataUpdateCoordinator], NumberEntity)
         if not float(value).is_integer():
             raise HomeAssistantError("This Sol-Ark setting requires a whole number")
         requested = int(value)
+        if self.entity_description.decimal_hhmm:
+            hour, minute = divmod(requested, 100)
+            if hour > 23 or minute > 59:
+                raise HomeAssistantError(
+                    "Enter time as 24-hour HHMM, for example 0, 400, 830, or 1630"
+                )
         current = cached_register(self.entry, self.entity_description.address)
         if current is None:
             raise HomeAssistantError(

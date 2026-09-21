@@ -232,3 +232,5 @@ Point 2 screen-change testing confirmed register 257 as TOU Power Point 2 (`1200
 - global Generator Charge at register 231.
 
 Point 1 and Point 2 establish the sequential layout. Points 3-6 follow that layout but have not each received repetitive individual screen-change testing. Users should allow several seconds for a verified write to appear on the master and then propagate over the parallel communications link to the slave. Do not issue successive changes while the prior value is still propagating.
+
+Development preview `1.1.0b3` replaces the Home Assistant time-domain controls with number-domain boxes because the time service produced errors in field use and added unwanted 12-hour formatting. Enter native 24-hour decimal HHMM values directly: `0` for 00:00, `400` for 04:00, `830` for 08:30, `1200` for 12:00, and `1630` for 16:30. Invalid hour/minute combinations are rejected before the Modbus write.

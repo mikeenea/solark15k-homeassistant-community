@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0b3 - HHMM box correction
+
+- Replace the six Home Assistant time entities with direct-entry number boxes.
+- Store and display the inverter's native decimal HHMM values without conversion.
+- Reject invalid HHMM entries such as 1260 or 2400 before any Modbus write.
+
 ## 1.1.0b2 - Complete six-period TOU preview
 
 - Add all six decimal-HHMM TOU time entities.

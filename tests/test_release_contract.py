@@ -17,7 +17,7 @@ class ReleaseContractTests(unittest.TestCase):
             (ROOT / "custom_components/solark15k/manifest.json").read_text()
         )
         self.assertEqual(manifest["domain"], "solark15k")
-        self.assertEqual(manifest["version"], "1.1.0b2")
+        self.assertEqual(manifest["version"], "1.1.0b3")
         self.assertTrue(manifest["config_flow"])
         self.assertEqual(manifest["iot_class"], "local_polling")
         self.assertTrue(manifest["documentation"].startswith("https://github.com/"))
@@ -43,7 +43,7 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertTrue((ROOT / "tools/solark_tou_research.py").exists())
         self.assertTrue((integration / "number.py").exists())
         self.assertTrue((integration / "switch.py").exists())
-        self.assertTrue((integration / "time.py").exists())
+        self.assertFalse((integration / "time.py").exists())
 
     def test_release_contains_four_supported_dashboards(self) -> None:
         dashboards = sorted((ROOT / "grafana/dashboards").glob("*.json"))
