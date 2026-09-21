@@ -8,6 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import entity_registry as er
 
 from .const import (
     CONF_DETAIL_INTERVAL,
@@ -28,6 +29,7 @@ from .const import (
     DEFAULT_REQUEST_TIMEOUT,
     DEFAULT_RETRIES,
     DEFAULT_SLAVE_ID,
+    DOMAIN,
     MASTER_SLAVE_ID,
     PLATFORMS,
 )
@@ -46,6 +48,51 @@ class SolArkRuntimeData:
 
 
 type SolArkConfigEntry = ConfigEntry[SolArkRuntimeData]
+
+
+def _remove_obsolete_tou_time_entities(
+    hass: HomeAssistant, entry: SolArkConfigEntry
+) -> None:
+    """Remove beta-2 time entities replaced by beta-3 HHMM number boxes."""
+    registry = er.async_get(hass)
+    unique_prefix = f"{entry.entry_id}_tou_time_point_"
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if (
+            entity.entity_id.startswith("time.")
+            and entity.platform == DOMAIN
+            and entity.unique_id.startswith(unique_prefix)
+        ):
+            registry.async_remove(entity.entity_id)
+
+
+def _migrate_control_entity_ids(
+    hass: HomeAssistant, entry: SolArkConfigEntry
+) -> None:
+    """Normalize beta configuration entity IDs without touching custom IDs."""
+    registry = er.async_get(hass)
+    tou_prefix = f"{entry.entry_id}_tou_"
+    generator_unique_id = f"{entry.entry_id}_generator_charge"
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if entity.platform != DOMAIN or not (
+            entity.unique_id.startswith(tou_prefix)
+            or entity.unique_id == generator_unique_id
+        ):
+            continue
+
+        new_entity_id = entity.entity_id.removesuffix("_hhmm")
+        for entity_domain in ("number", "switch"):
+            duplicate_prefix = f"{entity_domain}.solar_sol_ark_"
+            if new_entity_id.startswith(duplicate_prefix):
+                new_entity_id = (
+                    f"{entity_domain}.sol_ark_"
+                    f"{new_entity_id[len(duplicate_prefix):]}"
+                )
+                break
+
+        if new_entity_id != entity.entity_id and registry.async_get(new_entity_id) is None:
+            registry.async_update_entity(
+                entity.entity_id, new_entity_id=new_entity_id
+            )
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bool:
@@ -116,6 +163,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: SolArkConfigEntry) -> bo
         coordinator=coordinator,
         influx_fastpath=influx_fastpath,
     )
+    _remove_obsolete_tou_time_entities(hass, entry)
+    _migrate_control_entity_ids(hass, entry)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await coordinator.async_start()
     return True

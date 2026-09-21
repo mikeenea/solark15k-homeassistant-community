@@ -33,7 +33,7 @@ class SolArkNumberDescription(NumberEntityDescription):
 NUMBERS: tuple[SolArkNumberDescription, ...] = tuple(
     SolArkNumberDescription(
         key=f"tou_time_point_{point}",
-        name=f"TOU time point {point} (HHMM)",
+        name=f"TOU time point {point}",
         address=249 + point,
         native_min_value=0,
         native_max_value=2359,

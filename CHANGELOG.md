@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0b4 - Obsolete entity cleanup
+
+- Automatically remove the six beta-2 time-domain entities from the Home Assistant entity registry.
+- Retain only the replacement TOU time Point 1-6 HHMM number boxes.
+- Remove the unnecessary HHMM label and `_hhmm` entity-ID suffix from all six replacement boxes.
+- Normalize the accidental `solar_sol_ark` prefix to `sol_ark` for all new number and switch controls.
+
 ## 1.1.0b3 - HHMM box correction
 
 - Replace the six Home Assistant time entities with direct-entry number boxes.
