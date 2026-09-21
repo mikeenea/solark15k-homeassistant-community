@@ -216,6 +216,8 @@ Four additional master settings were isolated with before, after, and restored s
 | TOU Capacity Point 1 | 268 | 50 to 49 | Confirmed, direct percent |
 | TOU Charge Point 1 | 274 bit 0 | 1 to 0 | Confirmed packed flag |
 | Global Generator Charge | 231 | 1 to 0 | Confirmed Boolean |
+| Generator Start Capacity | 226 | 15 to 10 | Confirmed, direct percent; UI step 5% |
+| Generator Charge Current | 227 | 95 to 90 | Confirmed, direct amperes; UI step 5 A |
 
 The Sol-Ark presents one charge enable for each TOU period; it does not present separate grid and generator switches per period. Register 274 bit 0 is therefore identified as **TOU Charge Point 1**, not Grid Charge Point 1. Register 274 bit 1 remains unknown and blocked. Generator charging is enabled globally through register 231.
 
@@ -230,6 +232,22 @@ Point 2 screen-change testing confirmed register 257 as TOU Power Point 2 (`1200
 - Capacity Points 1-6 at registers 268-273 using direct percent;
 - Charge Points 1-6 at registers 274-279 using bit 0 with read-modify-write;
 - global Generator Charge at register 231.
+
+Subsequent master-screen testing confirmed Generator Start Capacity at register
+226 and Generator Charge Current at register 227. Both settings were restored to
+their original values with no remaining register differences. The tested Sol-Ark
+firmware does not expose an adjustable Generator Stop Capacity setting; its
+reported default behavior is 95% SOC, so the integration does not create an
+entity for it.
+
+Closed-loop BMS testing changed the requested charge voltage from 56.30 V to
+56.00 V and registers 201, 202, and 203 all followed from 5630 to 5600. After
+restoration, no register differences remained. This confirms their 0.01 V
+scaling and shows that these registers follow the BMS while closed-loop control
+is healthy. Absorption and float remain available as fallback/open-loop settings
+because they become important if closed-loop communication fails; users should
+expect the BMS to overwrite their displayed values during normal closed-loop
+operation.
 
 Point 1 and Point 2 establish the sequential layout. Points 3-6 follow that layout but have not each received repetitive individual screen-change testing. Users should allow several seconds for a verified write to appear on the master and then propagate over the parallel communications link to the slave. Do not issue successive changes while the prior value is still propagating.
 

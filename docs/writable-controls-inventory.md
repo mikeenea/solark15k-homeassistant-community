@@ -52,8 +52,8 @@ For a parallel system:
 | Battery type: Lithium | 200 | 0=lead/four-stage, 1=lithium | Candidate; changing battery type is high-impact | Blocked `select` |
 | Lithium protocol subtype | 325 | Vendor/protocol enumeration | Candidate; exact Sol-Ark values unknown | Blocked `select` |
 | Equalization charge voltage | 201 | 0.01 V | Strong candidate | Bounded `number` after validation |
-| Absorption charge voltage | 202 | 0.01 V | Strong candidate | Bounded `number` after validation |
-| Float charge voltage | 203 | 0.01 V | Strong candidate | Bounded `number` after validation |
+| Absorption charge voltage | 202 | 0.01 V | Address/scaling confirmed; closed-loop BMS drove registers 201-203 together | Fallback/open-loop box `number`; BMS may overwrite while closed loop is healthy |
+| Float charge voltage | 203 | 0.01 V | Address/scaling confirmed; closed-loop BMS drove registers 201-203 together | Fallback/open-loop box `number`; BMS may overwrite while closed loop is healthy |
 | Max charge current | 210; newer limit candidate 320 | 1 A | Candidate; screenshot shows 275 A, exceeding the older Deye 185 A table limit | Blocked until correct Sol-Ark register/range is proven |
 | Max discharge current | 211; newer limit candidate 321 | 1 A | Candidate; screenshot shows 275 A, exceeding the older Deye 185 A table limit | Blocked until correct Sol-Ark register/range is proven |
 | Stop/start/low battery SOC family | 217-219 | 1% | Candidate only; SolarAssistant labels do not map cleanly | Blocked pending screen-change correlation |
@@ -70,10 +70,10 @@ For a parallel system:
 | Generator peak shaving enabled | 280 bits 4-7 | Packed field | Strong candidate; must preserve unrelated bits | Guarded `switch` |
 | Generator peak shaving power | 292 | 1 W | Strong candidate; Deye range 0-16000 W | Bounded `number` |
 | Generator start voltage | 225 | 0.01 V | Strong candidate | Bounded `number` |
-| Generator start capacity | 226 | 1% SOC | Strong candidate | Bounded `number` |
-| Max generator charge current | 227 | 1 A | Strong candidate; Sol-Ark range must be confirmed | Bounded `number` |
+| Generator start capacity | 226 | 1% SOC; inverter UI uses 5% steps | **Confirmed**, 15% to 10% and restored | Box-mode `number` |
+| Max generator charge current | 227 | 1 A; inverter UI uses 5 A steps | **Confirmed**, 95 A to 90 A and restored | Box-mode `number` |
 | Generator stop voltage | Unresolved | - | Screenshot proves the concept, not its address | None until correlated |
-| Generator stop capacity | Unresolved | - | Screenshot proves the concept, not its address | None until correlated |
+| Generator stop capacity | Not exposed | Fixed/default behavior reported at 95% SOC | No adjustable setting on tested Sol-Ark firmware | No entity |
 | Generator maximum runtime | 223 | 0.1 hour | Candidate; not visible in supplied screenshots | Optional later `number` |
 | Generator cooling time | 224 | 0.1 hour | Candidate; not visible in supplied screenshots | Optional later `number` |
 

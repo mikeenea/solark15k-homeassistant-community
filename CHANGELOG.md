@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0b5 - Confirmed generator inputs
+
+- Add verified box inputs for Generator Start Capacity (register 226, 5% steps)
+  and Generator Charge Current (register 227, 5 A steps) on the master inverter.
+- Add fallback/open-loop Battery Absorption and Battery Float voltage boxes for
+  confirmed registers 202 and 203, with a warning that the BMS may overwrite
+  their values while closed-loop control is healthy.
+
 ## 1.1.0b4 - Obsolete entity cleanup
 
 - Automatically remove the six beta-2 time-domain entities from the Home Assistant entity registry.

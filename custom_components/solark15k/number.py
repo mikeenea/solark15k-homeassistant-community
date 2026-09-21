@@ -28,6 +28,7 @@ class SolArkNumberDescription(NumberEntityDescription):
 
     address: int
     decimal_hhmm: bool = False
+    raw_scale: float = 1.0
 
 
 NUMBERS: tuple[SolArkNumberDescription, ...] = tuple(
@@ -69,6 +70,53 @@ NUMBERS: tuple[SolArkNumberDescription, ...] = tuple(
         entity_category=EntityCategory.CONFIG,
     )
     for point in range(1, 7)
+) + (
+    SolArkNumberDescription(
+        key="battery_absorption_voltage",
+        name="Battery absorption voltage",
+        address=202,
+        native_min_value=40.0,
+        native_max_value=60.0,
+        native_step=0.1,
+        native_unit_of_measurement="V",
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+        raw_scale=0.01,
+    ),
+    SolArkNumberDescription(
+        key="battery_float_voltage",
+        name="Battery float voltage",
+        address=203,
+        native_min_value=40.0,
+        native_max_value=60.0,
+        native_step=0.1,
+        native_unit_of_measurement="V",
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+        raw_scale=0.01,
+    ),
+    SolArkNumberDescription(
+        key="generator_start_capacity",
+        name="Generator start capacity",
+        address=226,
+        native_min_value=10,
+        native_max_value=100,
+        native_step=5,
+        native_unit_of_measurement="%",
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    SolArkNumberDescription(
+        key="generator_charge_current",
+        name="Generator charge current",
+        address=227,
+        native_min_value=0,
+        native_max_value=185,
+        native_step=5,
+        native_unit_of_measurement="A",
+        mode=NumberMode.BOX,
+        entity_category=EntityCategory.CONFIG,
+    ),
 )
 
 
@@ -108,14 +156,20 @@ class SolArkNumber(CoordinatorEntity[SolArkDataUpdateCoordinator], NumberEntity)
     @property
     def native_value(self) -> float | None:
         """Return the latest value read from the inverter."""
-        return cached_register(self.entry, self.entity_description.address)
+        raw = cached_register(self.entry, self.entity_description.address)
+        if raw is None:
+            return None
+        return raw * self.entity_description.raw_scale
 
     async def async_set_native_value(self, value: float) -> None:
         """Validate and write one integer setting."""
-        if not float(value).is_integer():
-            raise HomeAssistantError("This Sol-Ark setting requires a whole number")
-        requested = int(value)
+        scale = self.entity_description.raw_scale
+        requested = round(float(value) / scale)
         if self.entity_description.decimal_hhmm:
+            if not float(value).is_integer():
+                raise HomeAssistantError(
+                    "This Sol-Ark time setting requires a whole HHMM number"
+                )
             hour, minute = divmod(requested, 100)
             if hour > 23 or minute > 59:
                 raise HomeAssistantError(

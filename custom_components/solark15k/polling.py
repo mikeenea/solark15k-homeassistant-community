@@ -30,6 +30,7 @@ def build_poll_groups(live_interval: float, fault_interval: float, detail_interv
     if not include_settings:
         return groups
     return groups + (
-        PollGroup("settings_generator", 231, 1, detail_interval, 4),
+        PollGroup("settings_battery_voltage", 201, 3, detail_interval, 4),
+        PollGroup("settings_generator", 226, 6, detail_interval, 4),
         PollGroup("settings_tou", 250, 30, detail_interval, 4),
     )
