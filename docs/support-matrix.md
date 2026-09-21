@@ -1,6 +1,6 @@
 # Support matrix
 
-Version `1.1.0rc1` is the field-tested release candidate for read-only monitoring
+Version `1.1.0` is the field-tested stable release for read-only monitoring
 and explicitly enabled master-inverter configuration controls. Read only remains
 the default. Items listed as optional do not affect Home Assistant monitoring.
 
